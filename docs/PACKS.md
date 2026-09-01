@@ -56,7 +56,7 @@ Showcase 里的记忆是标明用途的三条示意数据，只存在当次页�
 # 看全部可取项和组合方案
 npm run packs:list
 
-# 只带走漂浮物、必要 UI / Core 依赖与预览馆
+# 只带走漂浮物、必要 UI 依赖与预览馆
 npm run pack:take -- frontend/ambient /absolute/path/fuyue-ambient
 
 # 只带走本地账本
