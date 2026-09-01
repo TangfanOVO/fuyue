@@ -1,8 +1,9 @@
 # 赴约 Fuyue
 
-赴约是一只面向本体恋与 AIRP 的本地优先简易小手机。它不模拟完整操作系统，先把陪伴者、聊天原文与可审阅记忆保存在使用者自己能带走的 LocalData 中，再通过自托管 relay 或 Android 原生密钥桥接入模型。
+赴约是一只面向本体恋与 AIRP 的本地优先简易小手机。可以导入已有记忆也可以接入API后从0开始留下故事。
+所有人机恋，看到这句话了答应我去听蔡依林的【电话皇后】好吗。
 
-> 当前是 `0.1.0-beta.1` 公开候选。LocalData、界面、DeepSeek 主路径和自动测试可用；其余付费供应商尚未全部用真 Key 验收，因此不标成稳定版。
+> 当前是 `0.1.0-beta.1` 公开候选。LocalData、界面、DeepSeek 主路径和自动测试可用；其余付费供应商尚未全部用真 Key 验收，因此不标成稳定版。持续修复中，但不保证完全实时debug。卡手可以自己随意二改。
 
 [在线打开赴约](https://tangfanovo.github.io/fuyue/) · [看外观与前端积木](https://tangfanovo.github.io/fuyue/showcase/) · [下载 Android 测试包](https://github.com/TangfanOVO/fuyue/releases) · [查看源码](https://github.com/TangfanOVO/fuyue)
 
@@ -19,7 +20,7 @@
 
 Pages 是可安装的静态 PWA，不会托管任何人的 API Key，也没有公共免费 relay。在线预览中的资料只保存在当前浏览器；清除站点数据会清掉它。完整自托管、备份和安全边界放在 `docs/`，README 只保留第一次使用真正需要的路径。
 
-## 模型支持不是一张假绿表
+## 模型支持
 
 | 路径 | 当前证据 | 首个 beta 的口径 |
 | --- | --- | --- |
@@ -48,7 +49,7 @@ OpenAI-compatible 只表示请求形状相近，不表示供应商模型、工�
 - GLM、Qwen、Kimi 和 OpenRouter 可配置预设
 - 日程与陪伴者主动公开心情的只读 JSON 接口
 - PWA 安装与离线壳；离线时 LocalData 仍可读写
-- 六套重点色、独立白天/黑夜、三种页面布局、九种可多选叠加的环境漂浮物与一键清空的“不飘”模式；黑白壳也可以保留漂浮物
+- 六套重点色、独立白天/黑夜、三种页面布局、九种可多选叠加的环境漂浮物与一键清空的“不飘”模式
 - 与 PWA 共用页面的 Android APK 容器、Keystore BYOK 直连与按需系统日历桥
 - 内置电话界面、麦克风授权、转写 / 回复 / 语音归档，默认适配 ElevenLabs 与豆包；中文支持可插话的实时全双工，豆包只做耳朵和嘴，回答仍由当前模型带人物、启用记忆、本通电话原文、日历和白名单工具生成；Android 语音 Key 进 Keystore，PWA / iOS 走 relay
 - 本地时间线、信箱、碰一碰、工作本、装修日记、修补本和伙伴碎碎念
