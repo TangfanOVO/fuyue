@@ -777,11 +777,12 @@ export function App() {
     );
     const updateViewport = () => {
       const visibleHeight = Math.round(viewport?.height || window.innerHeight);
+      const visibleTop = Math.round(viewport?.offsetTop || 0);
       const obscuredHeight = Math.max(
         0,
         window.innerHeight -
           visibleHeight -
-          Math.round(viewport?.offsetTop || 0),
+          visibleTop,
       );
       const composerFocused =
         document.activeElement instanceof HTMLElement &&
@@ -795,6 +796,10 @@ export function App() {
       document.documentElement.style.setProperty(
         "--app-viewport-height",
         `${visibleHeight}px`,
+      );
+      document.documentElement.style.setProperty(
+        "--app-viewport-top",
+        `${visibleTop}px`,
       );
       setKeyboardOpen(
         composerFocused &&
@@ -819,6 +824,7 @@ export function App() {
       document.removeEventListener("focusout", updateAfterFocus);
       window.cancelAnimationFrame(focusFrame);
       document.documentElement.style.removeProperty("--app-viewport-height");
+      document.documentElement.style.removeProperty("--app-viewport-top");
     };
   }, [deviceAvailable]);
   useEffect(() => {
@@ -1363,6 +1369,7 @@ export function App() {
       data-theme={appearance.theme}
       data-mode={appearance.mode}
       data-layout={appearance.layout}
+      data-view={view}
       data-keyboard-open={keyboardOpen ? "true" : "false"}
     >
       <AmbientLines

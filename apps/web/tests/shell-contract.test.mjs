@@ -97,15 +97,19 @@ test("chat presents one continuous ledger and keeps source switching inside the 
 });
 
 test("chat owns its scrolling while composer and bottom navigation stay in the viewport", () => {
-  assert.match(source, /data-view=\{view\}/);
-  assert.match(styles, /\.app-background\[data-view="chat"\] \{ height: var\(--app-viewport-height, 100dvh\); overflow: hidden; \}/);
+  assert.match(source, /className="app-shell"[\s\S]{0,240}?data-view=\{view\}/);
+  assert.match(styles, /body:has\(\.app-shell\[data-view="chat"\]\)[^}]*overflow: hidden/);
+  assert.match(styles, /\.app-shell\[data-view="chat"\] \{[^}]*position: fixed;[^}]*height: var\(--app-viewport-height, 100dvh\);[^}]*min-height: 0;[^}]*overflow: hidden;/s);
+  assert.match(styles, /\.app-background\[data-view="chat"\] \{ height: 100%; min-height: 0; overflow: hidden; \}/);
   assert.match(styles, /\.view-frame\[data-view="chat"\] \.message-list[^}]*overflow-y: auto/s);
   assert.match(styles, /\.view-frame\[data-view="chat"\] \.composer-zone \{ position: relative; bottom: auto;/);
   assert.match(styles, /\.bottom-nav \{ position: fixed;/);
   assert.match(source, /window\.visualViewport/);
+  assert.match(source, /--app-viewport-top/);
   assert.match(source, /deviceAvailable \? Math\.round\(window\.screen\.height/);
   assert.match(source, /data-keyboard-open=\{keyboardOpen/);
   assert.match(styles, /\.app-shell\[data-keyboard-open="true"\] \.bottom-nav/);
+  assert.doesNotMatch(styles, /data-keyboard-open="true"[^}]*\.topbar[^}]*display:\s*none/);
   assert.match(chat, /messageListRef\.current/);
   assert.match(chat, /list\.scrollTop = list\.scrollHeight/);
   assert.doesNotMatch(chat, /scrollIntoView/);

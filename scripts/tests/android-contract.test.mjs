@@ -17,6 +17,7 @@ test("Android shell keeps network and backup boundaries explicit", () => {
   assert.match(manifest, /android:allowBackup="false"/);
   assert.match(manifest, /android:usesCleartextTraffic="false"/);
   assert.match(manifest, /android\.permission\.INTERNET/);
+  assert.match(manifest, /android:windowSoftInputMode="adjustResize"/);
   assert.match(config, /androidScheme: "https"/);
   assert.match(config, /allowMixedContent: false/);
   assert.match(activity, /removeStaleNativeServiceWorker\(\)/);

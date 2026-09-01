@@ -26,6 +26,10 @@ test("Android calendar is a device capability, not a model connection redirect",
   assert.doesNotMatch(app, /openCalendarSetup\s*=\s*\(\)\s*=>\s*openPanel\("connection"\)/);
 });
 
+test("Android resizes the chat viewport above the software keyboard", () => {
+  assert.match(manifest, /android:windowSoftInputMode="adjustResize"/);
+});
+
 test("calendar permission is requested only from its explicit feature screen", () => {
   assert.match(app, /requestNativeCalendarAccess\(mode\)/);
   assert.match(app, /只在这里点授权时请求/);
