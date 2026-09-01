@@ -3,14 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "license": "AGPL-3.0-only",
+  "license": "MIT",
   "scripts": {
     "build": "vite build",
     "dev": "vite --host 0.0.0.0 --port 4175",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@fuyue/core": "0.1.0",
     "@fuyue/ui": "0.1.0",
     "lucide-react": "^1.33.0",
     "react": "^19.2.0",

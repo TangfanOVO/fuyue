@@ -1,8 +1,19 @@
-import type { MemoryItem } from "@fuyue/core";
 import { type ReactNode } from "react";
 import { MemoryConstellation, type ConstellationMemory, type ConstellationRelation, visualNodeCountForMemoryCount } from "./memory-constellation";
 
 export { visualNodeCountForMemoryCount, worldDimensionScaleForVisualNodeCount, wrapWorldY } from "./memory-constellation";
+
+export interface MemoryItem {
+  id: string;
+  title: string;
+  content: string;
+  layer: "working" | "semantic" | "core";
+  status: "draft" | "active" | "archived";
+  injectionEnabled: boolean;
+  sourceMessageIds: string[];
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface MemoryLedgerProps {
   memories: MemoryItem[];

@@ -106,8 +106,7 @@
       "label": "前端积木总包",
       "summary": "外观、动效、漂浮物、叠卡、开屏和记忆可视化的共享包。",
       "kind": "standalone",
-      "requires": ["function/localdata"],
-      "paths": ["packages/ui", "apps/showcase", "apps/web/src/ambient-lines.tsx", "apps/web/src/ambient-shapes.ts"],
+      "paths": ["packages/ui", "apps/showcase"],
       "imports": ["@fuyue/ui/appearance", "@fuyue/ui/motion", "@fuyue/ui/ambient", "@fuyue/ui/stack-deck", "@fuyue/ui/splash", "@fuyue/ui/memory", "@fuyue/ui/styles.css"],
       "docs": ["apps/web/DESIGN.md", "licenses/AMBIENT_ICON_SOURCES.md"],
       "truth": "不包含人物、聊天、密钥或后端；采用者需要自行提供宿主尺寸与 CSS 变量。"
@@ -157,7 +156,7 @@
       "label": "记忆账本与星图前端",
       "summary": "证据关系、启停召回、字符星图、拖动缩放与点选。",
       "kind": "standalone",
-      "requires": ["function/memory-review", "frontend/ui-kit"],
+      "requires": ["frontend/ui-kit"],
       "imports": ["@fuyue/ui/memory", "@fuyue/ui/styles.css"],
       "truth": "只渲染采用者传入的数据，不附带记忆服务或演示记忆。"
     },

@@ -45,11 +45,13 @@ test("take command produces a minimal ambient workspace with preview and no arti
   try {
     await execFileAsync(process.execPath, [fileURLToPath(new URL("../take-pack.mjs", import.meta.url)), "frontend/ambient", target], { cwd: rootPath });
     const generated = JSON.parse(await readFile(join(target, "package.json"), "utf8"));
-    assert.deepEqual(generated.workspaces, ["packages/core", "packages/ui", "apps/showcase"]);
+    assert.deepEqual(generated.workspaces, ["packages/ui", "apps/showcase"]);
+    assert.equal(generated.license, "MIT");
     assert.ok(generated.scripts.build.includes("@fuyue/showcase"));
     await access(join(target, "TAKEAWAY.md"));
-    await access(join(target, "apps", "web", "src", "ambient-lines.tsx"));
+    await access(join(target, "packages", "ui", "src", "ambient-lines.tsx"));
     await access(join(target, "apps", "showcase", "src", "main.tsx"));
+    assert.match(await readFile(join(target, "LICENSE"), "utf8"), /^MIT License/);
     await assert.rejects(access(join(target, "packages", "ui", "dist")));
     await assert.rejects(access(join(target, "packages", "ui", "node_modules")));
   } finally {

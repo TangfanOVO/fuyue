@@ -130,6 +130,8 @@ async function workspacesIn(target) {
 
 async function writeRootManifest(target, selected, included, paths) {
   const workspaces = await workspacesIn(target);
+  const workspaceLicenses = new Set(workspaces.map(({ manifest }) => manifest.license).filter(Boolean));
+  const license = workspaceLicenses.size === 1 ? [...workspaceLicenses][0] : catalog.license;
   const commands = (script) => workspaces.filter(({ manifest }) => manifest.scripts?.[script]).map(({ manifest }) => `npm run ${script} -w ${manifest.name}`);
   const build = commands("build");
   const tests = commands("test");
@@ -151,7 +153,7 @@ async function writeRootManifest(target, selected, included, paths) {
     name: `fuyue-takeaway-${slug}`,
     private: true,
     version: "0.1.0",
-    license: catalog.license,
+    license,
     engines: { node: ">=22.12.0" },
     workspaces: workspaces.map(({ directory }) => directory),
     scripts,
@@ -162,12 +164,15 @@ async function writeRootManifest(target, selected, included, paths) {
     } : {}),
   };
   await writeFile(join(target, "package.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+  if (license === "MIT" && await pathExists(join(target, "packages", "ui", "LICENSE"))) {
+    await cp(join(target, "packages", "ui", "LICENSE"), join(target, "LICENSE"));
+  }
 
   const imports = [...new Set(included.flatMap(({ item }) => item.imports || []))];
   const notes = included.map(({ reference, item }) => `- \`${reference}\` — ${item.label}\n  - ${item.truth}`).join("\n");
   const pathLines = paths.map((path) => `- \`${path}\``).join("\n");
   const importLines = imports.length ? imports.map((path) => `- \`${path}\``).join("\n") : "- 这个切片没有独立 import 路径，请按目录中的应用契约接入。";
-  const readme = `# ${selected.item.label}\n\n这是由 \`fuyue.layers.json\` 生成的最小取件工作区。选中项为 \`${selected.reference}\`，所有必要依赖已自动带上。\n\n## 先跑起来\n\n\`\`\`bash\nnpm install\n${scripts.build ? "npm run build\n" : ""}${scripts["dev:showcase"] ? "npm run dev:showcase\n" : scripts["dev:web"] ? "npm run dev:web\n" : ""}\`\`\`\n\n## 包含的积木\n\n${notes}\n\n## 可引入路径\n\n${importLines}\n\n## 保留的源码路径\n\n${pathLines}\n\n## 边界\n\n- 取件工具不复制 \`.env\`、KeyStore、构建产物、缓存或 \`node_modules\`。\n- 包含前端预览不代表已连接真实模型、语音、记忆蒸馏或系统日历。\n- 继续分发修改版时，请保留本目录的授权与第三方说明。\n`;
+  const readme = `# ${selected.item.label}\n\n这是由 \`fuyue.layers.json\` 生成的最小取件工作区。选中项为 \`${selected.reference}\`，所有必要依赖已自动带上。\n\n## 先跑起来\n\n\`\`\`bash\nnpm install\n${scripts.build ? "npm run build\n" : ""}${scripts["dev:showcase"] ? "npm run dev:showcase\n" : scripts["dev:web"] ? "npm run dev:web\n" : ""}\`\`\`\n\n## 包含的积木\n\n${notes}\n\n## 可引入路径\n\n${importLines}\n\n## 保留的源码路径\n\n${pathLines}\n\n## 许可\n\n这份取件使用 **${license}**。完整赴约应用仍使用 AGPL-3.0-only；只有被单独标明的前端积木可按 MIT 带走。\n\n## 边界\n\n- 取件工具不复制 \`.env\`、KeyStore、构建产物、缓存或 \`node_modules\`。\n- 包含前端预览不代表已连接真实模型、语音、记忆蒸馏或系统日历。\n- 继续分发修改版时，请保留本目录的授权与第三方说明。\n`;
   await writeFile(join(target, "TAKEAWAY.md"), readme, "utf8");
 }
 

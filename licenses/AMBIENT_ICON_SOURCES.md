@@ -1,6 +1,6 @@
 # Ambient icon sources
 
-The ambient particle SVG variants in `apps/web/src/ambient-shapes.ts` were
+The ambient particle SVG variants in `packages/ui/src/ambient-shapes.ts` were
 exported from the Iconify API. The original handoff records the following
 upstream collection prefixes:
 

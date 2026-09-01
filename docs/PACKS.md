@@ -13,6 +13,8 @@ npm run dev:showcase
 
 打开 `http://localhost:4175`，可直接试多选漂浮物、配色 / 明暗 / 壳排布、原地浮起叠卡、跟随主题的记忆账本 / 星图和开屏。点“不飘”会清空全部漂浮物；黑白壳也允许继续叠加。GitHub Pages 构建会把同一预览放在主 PWA 的 `/showcase/` 子目录。
 
+想把“前端作业”发给别人时，运行 `npm run build -w @fuyue/showcase`，然后上传整个 `apps/showcase/dist/` 静态目录。`index.html` 会使用同目录的 `assets/`，因此不能只单发一个 `index.html`；直接发 [线上 Showcase](https://tangfanovo.github.io/fuyue/showcase/) 最省事。预览里的“看源码·拿走这些积木”固定回到公开仓库的 [`packages/ui`](https://github.com/TangfanOVO/fuyue/tree/main/packages/ui)，不会跳本机路径。
+
 Showcase 里的记忆是标明用途的三条示意数据，只存在当次页面内存中；它不会读或写访问者的赴约账本。
 
 ## 1. 按功能带走
@@ -86,4 +88,4 @@ npm run dev:showcase
 
 ## 版本与许可
 
-公开主体是 AGPL-3.0-only；包内另行标注的 MIT 组件保留它们自己的许可。取件会复制 `LICENSE`、`THIRD_PARTY_NOTICES.md`和相应上游说明；它不会把私密数据、账号、Cookie 或供应商 Key 当成“示例”一起带走。
+完整赴约和未单独标注的源码是 AGPL-3.0-only。`packages/ui`、`apps/showcase` 与 `packages/kaomoji-drawer` 单独使用 MIT；MIT 积木被组装进整家时，整家仍按 AGPL 分发。取件器会根据实际带走的 workspace 生成对应 `LICENSE`，并保留 `THIRD_PARTY_NOTICES.md` 和上游说明；它不会把私密数据、账号、Cookie 或供应商 Key 当成“示例”一起带走。

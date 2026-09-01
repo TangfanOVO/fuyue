@@ -4,13 +4,15 @@ import test from "node:test";
 
 test("ui package exposes independently importable visual layers", async () => {
   const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+  assert.equal(pkg.license, "MIT");
+  assert.equal(pkg.peerDependencies["@fuyue/core"], undefined);
   for (const name of ["./ambient", "./motion", "./stack-deck", "./memory", "./appearance", "./splash", "./styles.css"]) assert.ok(pkg.exports[name]);
   const splash = await readFile(new URL("../src/splash.tsx", import.meta.url), "utf8");
   assert.match(splash, /setVisible\(false\)/);
   assert.doesNotMatch(splash, /setTimeout\(\(\) => setVisible\(false\)/);
   const memory = await readFile(new URL("../src/memory.tsx", import.meta.url), "utf8");
   const constellation = await readFile(new URL("../src/memory-constellation.tsx", import.meta.url), "utf8");
-  const ambient = await readFile(new URL("../../../apps/web/src/ambient-lines.tsx", import.meta.url), "utf8");
+  const ambient = await readFile(new URL("../src/ambient-lines.tsx", import.meta.url), "utf8");
   const appearance = await readFile(new URL("../src/appearance.ts", import.meta.url), "utf8");
   const memoryStyles = await readFile(new URL("../src/memory-constellation.css", import.meta.url), "utf8");
   assert.match(memory, /export function MemoryMap/);

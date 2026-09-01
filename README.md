@@ -146,7 +146,7 @@ npm run packs:list
 npm run pack:take -- frontend/ambient /absolute/new-folder
 ```
 
-第二条命令会生成一个新的最小 workspace，自动带上必要源码、文档、授权说明、构建命令与 `TAKEAWAY.md`，但不带 `.env`、KeyStore、缓存、构建产物或私人数据。外观积木还有可部署的 Showcase：本机运行 `npm run dev:showcase` 后打开 `http://localhost:4175`，GitHub Pages 则会把它放在主 PWA 的 `/showcase/`。详细表格、import 路径和验证方式见 [自取目录](./docs/PACKS.md)。
+第二条命令会生成一个新的最小 workspace，自动带上必要源码、文档、授权说明、构建命令与 `TAKEAWAY.md`，但不带 `.env`、KeyStore、缓存、构建产物或私人数据。外观积木还有可部署的 Showcase：本机运行 `npm run dev:showcase` 后打开 `http://localhost:4175`，GitHub Pages 则会把它放在主 PWA 的 `/showcase/`。要另行分享静态预览，请上传整个 `apps/showcase/dist/`，不要只单发依赖 `assets/` 的 `index.html`。详细表格、import 路径和验证方式见 [自取目录](./docs/PACKS.md)。
 
 界面左上角抽屉与书房都有“功能包”。赴约已完成且许可兼容的实现默认随整家部署；原仓库作为归因、许可证与可替换实现，不会抢占内置实现的默认位置。页面区分“整包已内置”、“前端已带”、“外部扩展”和“已隐藏”，也允许只拿前端、接自己的后端、接兼容服务、使用原仓库或完全隐藏。已经随包运行的能力会当场启用，完全隐藏会真正撤掉普通入口；这两类都不生成重复工作单。只有需要外部实现的选择才会下载 `fuyue-build-plan`，并在共同工作本留下建议路径与验收清单。手机端不会冒充已经拉取仓库。
 
@@ -192,4 +192,4 @@ LocalData 默认只进入浏览器 IndexedDB。清除站点数据会清除本地
 
 完整清单见 [PUBLICATION_BOUNDARY.md](./PUBLICATION_BOUNDARY.md)。导入规则见 [对话导入契约](./docs/CONVERSATION_IMPORT_CONTRACT.md)，统一后端接口见 [Relay API 契约](./docs/RELAY_API_CONTRACT.md)。
 
-本项目采用 AGPL-3.0-only。
+完整赴约采用 AGPL-3.0-only。`packages/ui`、Showcase 和颜文字抽屉单独采用 MIT，方便只带走漂浮物、记忆可视化、叠卡等前端积木；各目录内的 `LICENSE` 为准。

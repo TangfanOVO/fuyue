@@ -19,7 +19,7 @@ await build({
   format: "esm",
   target: "es2022",
   sourcemap: true,
-  external: ["react", "react/jsx-runtime", "@fuyue/core", "lucide-react"],
+  external: ["react", "react/jsx-runtime", "lucide-react"],
 });
 await copyFile(new URL("../src/styles.css", import.meta.url), new URL("../dist/styles.css", import.meta.url));
 await copyFile(new URL("../src/memory-constellation.css", import.meta.url), new URL("../dist/memory-constellation.css", import.meta.url));

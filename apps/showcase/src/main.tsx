@@ -2,10 +2,9 @@ import type { CSSProperties, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { ArrowRight, BookOpen, CalendarDays, Check, Clipboard, Heart, House, Layers3, Menu, MessageCircle, Mic, MicOff, Moon, Palette, Phone, PhoneOff, Radio, Sparkles, Sun, Volume2, WandSparkles } from "lucide-react";
-import type { MemoryItem } from "@fuyue/core/types";
 import { AmbientLines, LineEffectGlyph, type LineEffect } from "@fuyue/ui/ambient";
 import { lineEffectRegistry, shellRegistry, themeRegistry, type AppearanceMode, type ShellLayout, type ThemeName } from "@fuyue/ui/appearance";
-import { MemoryLedger, MemoryMap, visualNodeCountForMemoryCount } from "@fuyue/ui/memory";
+import { MemoryLedger, MemoryMap, visualNodeCountForMemoryCount, type MemoryItem } from "@fuyue/ui/memory";
 import { FuyueSplash } from "@fuyue/ui/splash";
 import { StackDeck } from "@fuyue/ui/stack-deck";
 import "@fuyue/ui/styles.css";
@@ -156,10 +155,10 @@ function App() {
     <main id="top"><section className="hero"><p>先看、先点，再带走</p><h1>不用把整台小手机<br />都搬回家。</h1><span>外观积木可独立引入；电话这种跨端功能会明确标成应用切片，预览不冒充真实接通。</span></section>
       <nav className="demo-nav" aria-label="预览分类">{demos.map((demo) => <button key={demo.id} type="button" className={active === demo.id ? "active" : ""} onClick={() => chooseDemo(demo.id)}><small>{demo.eyebrow}</small><strong>{demo.label}</strong></button>)}</nav>
       <section className="preview-layout"><div className="preview-shell app-shell" data-theme={theme} data-mode={mode} data-layout={layout}><div className="preview-topline"><span>预览纸面</span><em>{mode === "dark" ? "黑夜" : "白天"} · {layout}</em></div>{preview}</div>
-        <aside className="take-card"><small>{activeDemo.symbol ? "这一块的引入路径" : "这是跨端应用切片"}</small><code>{activeDemo.module}</code>{activeDemo.symbol ? <CopyButton value={`import { ${activeDemo.symbol} } from \"${activeDemo.module}\";`} /> : <p>电话同时依赖页面、聊天模型、语音桥和移动端容器，不伪装成一行 import 就能真接通。</p>}<hr /><p>要带走它，用仓库根目录的取件命令：</p><code className="command">npm run pack:take -- {activeDemo.pack} /absolute/path</code><span>命令会自动带上必要依赖和授权说明。</span></aside>
+        <aside className="take-card"><small>{activeDemo.symbol ? "这一块的引入路径" : "这是跨端应用切片"}</small><code>{activeDemo.module}</code>{activeDemo.symbol ? <CopyButton value={`import { ${activeDemo.symbol} } from \"${activeDemo.module}\";`} /> : <p>电话同时依赖页面、聊天模型、语音桥和移动端容器，不伪装成一行 import 就能真接通。</p>}<hr /><p>要带走它，用仓库根目录的取件命令：</p><code className="command">npm run pack:take -- {activeDemo.pack} /absolute/path</code><span>命令会自动带上必要依赖和授权说明。</span><a className="source-link" href="https://github.com/TangfanOVO/fuyue/tree/main/packages/ui" target="_blank" rel="noreferrer">看源码·拿走这些积木<ArrowRight /></a></aside>
       </section>
     </main>
-    <footer className="site-footer"><span>预览页不连模型、不读本机记忆、不申请麦克风、不收集数据。</span><code>AGPL-3.0-only</code></footer>
+    <footer className="site-footer"><span>预览页不连模型、不读本机记忆、不申请麦克风、不收集数据。</span><code>前端积木 MIT · 完整赴约 AGPL-3.0-only</code></footer>
   </div>;
 }
 

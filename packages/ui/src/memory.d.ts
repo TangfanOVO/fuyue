@@ -1,5 +1,5 @@
-import type { MemoryItem } from "@fuyue/core";
 import type { ComponentType, ReactNode } from "react";
+export interface MemoryItem { id: string; title: string; content: string; layer: "working" | "semantic" | "core"; status: "draft" | "active" | "archived"; injectionEnabled: boolean; sourceMessageIds: string[]; createdAt: string; updatedAt: string }
 export interface MemoryLedgerProps { memories: MemoryItem[]; labels?: Partial<Record<MemoryItem["layer"], string>>; empty?: ReactNode; onToggle?: (memory: MemoryItem) => void; onOpen?: (memory: MemoryItem) => void }
 export const MemoryLedger: ComponentType<MemoryLedgerProps>;
 export interface MemoryMapProps { memories: MemoryItem[]; selectedId?: string; onSelect?: (memory: MemoryItem) => void; empty?: ReactNode }

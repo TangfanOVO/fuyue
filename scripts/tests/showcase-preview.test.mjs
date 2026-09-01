@@ -27,3 +27,9 @@ test("showcase lets adopters verify memory density without writing fake records"
   assert.match(source, /不写入 LocalData/);
   assert.match(styles, /\.memory-scale-controls/);
 });
+
+test("showcase points take-away visitors back to the public MIT source", () => {
+  assert.match(source, /https:\/\/github\.com\/TangfanOVO\/fuyue\/tree\/main\/packages\/ui/);
+  assert.match(source, /前端积木 MIT · 完整赴约 AGPL-3\.0-only/);
+  assert.match(styles, /\.source-link/);
+});
