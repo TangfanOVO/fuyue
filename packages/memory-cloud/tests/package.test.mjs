@@ -1,0 +1,2 @@
+import test from "node:test"; import assert from "node:assert/strict"; import { createMemoryCloud } from "../dist/index.js";
+test("memory cloud recalls through the documented path",async()=>{let seen=""; const cloud=createMemoryCloud({baseUrl:"http://127.0.0.1:8787",fetcher:async(url)=>{seen=String(url); return new Response(JSON.stringify({hits:[]}),{status:200,headers:{"content-type":"application/json"}});}}); assert.deepEqual(await cloud.recall({query:"雨天",limit:999}),{hits:[]}); assert.equal(seen,"http://127.0.0.1:8787/v1/memory/recall");});

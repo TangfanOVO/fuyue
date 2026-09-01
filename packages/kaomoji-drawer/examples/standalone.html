@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fuyue Kaomoji Drawer — 纯 HTML 示例</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; padding: 24px; background: #f5f7fa; color: #20262d; font-family: ui-sans-serif, system-ui, sans-serif; }
+      main { width: min(720px, 100%); margin: 0 auto; display: grid; gap: 16px; }
+      textarea { width: 100%; min-height: 110px; padding: 14px; border: 1px solid #dfe5eb; border-radius: 14px; font: inherit; resize: vertical; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <textarea id="message" aria-label="消息" placeholder="点下面的颜文字，会插入到光标这里"></textarea>
+      <div id="kaomoji-drawer"></div>
+    </main>
+    <script src="../dist/standalone.js"></script>
+    <script>FuyueKaomoji.mount("#kaomoji-drawer", { input: "#message" });</script>
+  </body>
+</html>

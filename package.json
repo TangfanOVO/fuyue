@@ -1,0 +1,61 @@
+{
+  "name": "fuyue-open-source",
+  "private": true,
+  "version": "0.1.0",
+  "license": "AGPL-3.0-only",
+  "homepage": "https://tangfanovo.github.io/fuyue/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TangfanOVO/fuyue.git"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @fuyue/core && npm run build -w @fuyue/toybox && npm run build -w @fuyue/ui && npm run build -w @fuyue/travel-ui && npm run build -w @fuyue/memory-cloud && npm run build -w @fuyue/kaomoji-drawer && npm run build -w @fuyue/relay && npm run build -w @fuyue/web && npm run build -w @fuyue/showcase",
+    "build:pages": "npm run build -w @fuyue/core && npm run build -w @fuyue/ui && npm run build -w @fuyue/web && npm run build -w @fuyue/showcase && node scripts/merge-pages.mjs",
+    "dev": "npm run build -w @fuyue/core && npm run build -w @fuyue/toybox && npm run build -w @fuyue/kaomoji-drawer && npm run dev -w @fuyue/web",
+    "dev:all": "node scripts/dev-all.mjs",
+    "dev:showcase": "npm run build -w @fuyue/core && npm run build -w @fuyue/ui && npm run dev -w @fuyue/showcase",
+    "dev:phone": "npm run build -w @fuyue/core && npm run build -w @fuyue/kaomoji-drawer && npm run dev -w @fuyue/web -- --host 0.0.0.0 --port 4184 --strictPort",
+    "dev:relay": "npm run build -w @fuyue/core && npm run build -w @fuyue/relay && npm run start -w @fuyue/relay",
+    "setup:deepseek": "node scripts/setup-deepseek.mjs",
+    "setup": "node scripts/setup-home.mjs && node scripts/setup-engawa.mjs",
+    "setup:engawa": "node scripts/setup-engawa.mjs",
+    "doctor:relay": "npm run build -w @fuyue/core && npm run build -w @fuyue/relay && node --env-file-if-exists=apps/relay/.env scripts/doctor-relay.mjs",
+    "qa:browser": "node scripts/qa-public-shell.mjs",
+    "qa:readme": "npm run build && node scripts/qa-readme-first-chat.mjs",
+    "qa:call": "node scripts/qa-call-redesign.mjs",
+    "qa:navigation": "node scripts/qa-navigation-memory.mjs",
+    "packs:list": "node scripts/take-pack.mjs --list",
+    "pack:take": "node scripts/take-pack.mjs",
+    "convert:private": "node scripts/convert-private-continuity.mjs",
+    "test": "npm run build -w @fuyue/core && npm run build -w @fuyue/toybox && npm run build -w @fuyue/ui && npm run build -w @fuyue/travel-ui && npm run build -w @fuyue/memory-cloud && npm run build -w @fuyue/kaomoji-drawer && npm run build -w @fuyue/relay && npm run build -w @fuyue/showcase && npm run test -w @fuyue/core && npm run test -w @fuyue/toybox && npm run test -w @fuyue/ui && npm run test -w @fuyue/travel-ui && npm run test -w @fuyue/memory-cloud && npm run test -w @fuyue/kaomoji-drawer && npm run test -w @fuyue/relay && npm run test -w @fuyue/web && node --test scripts/tests/*.test.mjs && npm run check:privacy",
+    "typecheck": "npm run typecheck -w @fuyue/core && npm run build -w @fuyue/core && npm run typecheck -w @fuyue/toybox && npm run build -w @fuyue/toybox && npm run typecheck -w @fuyue/ui && npm run build -w @fuyue/ui && npm run typecheck -w @fuyue/travel-ui && npm run build -w @fuyue/travel-ui && npm run typecheck -w @fuyue/memory-cloud && npm run typecheck -w @fuyue/kaomoji-drawer && npm run build -w @fuyue/kaomoji-drawer && npm run typecheck -w @fuyue/relay && npm run typecheck -w @fuyue/web && npm run typecheck -w @fuyue/showcase",
+    "check:privacy": "node scripts/check-public-boundary.mjs",
+    "check:privacy:release": "PUBLIC_RELEASE=1 node scripts/check-public-boundary.mjs",
+    "package:public": "node scripts/prepare-public-copy.mjs",
+    "verify:clean": "node scripts/verify-clean-room.mjs",
+    "android:sync": "npm run build && cap sync android",
+    "android:debug": "npm run android:sync && cd android && ./gradlew assembleDebug",
+    "android:live": "node scripts/android-live.mjs",
+    "android:open": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.0",
+    "@capacitor/core": "8.5.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.0",
+    "playwright-core": "^1.62.1"
+  },
+  "overrides": {
+    "xcode": {
+      "uuid": "11.1.1"
+    }
+  }
+}

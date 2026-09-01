@@ -1,0 +1,35 @@
+{
+  "name": "@fuyue/ui",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "sideEffects": ["*.css"],
+  "exports": {
+    "./ambient": { "types": "./dist/ambient.d.ts", "import": "./dist/ambient.js" },
+    "./motion": { "types": "./dist/motion.d.ts", "import": "./dist/motion.js" },
+    "./stack-deck": { "types": "./dist/stack-deck.d.ts", "import": "./dist/stack-deck.js" },
+    "./memory": { "types": "./dist/memory.d.ts", "import": "./dist/memory.js" },
+    "./appearance": { "types": "./dist/appearance.d.ts", "import": "./dist/appearance.js" },
+    "./splash": { "types": "./dist/splash.d.ts", "import": "./dist/splash.js" },
+    "./styles.css": "./dist/styles.css"
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test tests/*.test.mjs"
+  },
+  "peerDependencies": {
+    "@fuyue/core": "^0.1.0",
+    "lucide-react": ">=1.33.0",
+    "react": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@fuyue/core": "0.1.0",
+    "@types/react": "^19.1.0",
+    "esbuild": "^0.25.0",
+    "lucide-react": "^1.33.0",
+    "react": "^19.0.0",
+    "typescript": "^5.9.3"
+  }
+}

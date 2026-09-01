@@ -1,0 +1,227 @@
+{
+  "$schema": "./docs/fuyue-layers.schema.json",
+  "version": 2,
+  "license": "AGPL-3.0-only",
+  "functionPacks": {
+    "localdata": {
+      "label": "LocalData 本地账本",
+      "summary": "人物、连续原文、记忆、房间数据与可迁移副本的浏览器端真源。",
+      "kind": "standalone",
+      "paths": ["packages/core"],
+      "imports": ["@fuyue/core/types", "@fuyue/core/repository", "@fuyue/core/indexeddb", "@fuyue/core/snapshot"],
+      "docs": ["docs/CONVERSATION_IMPORT_CONTRACT.md"],
+      "truth": "不包含模型、云同步、私人数据或供应商密钥；清除站点数据会清除未导出的本地副本。"
+    },
+    "model-relay": {
+      "label": "模型 Relay",
+      "summary": "DeepSeek、OpenAI、Gemini、Anthropic 与 OpenAI-compatible 的自托管流式桥。",
+      "kind": "standalone",
+      "requires": ["function/localdata"],
+      "paths": ["apps/relay", "scripts/setup-deepseek.mjs", "scripts/doctor-relay.mjs"],
+      "imports": ["@fuyue/core/gateway", "@fuyue/core/capabilities"],
+      "docs": ["docs/RELAY_API_CONTRACT.md", "docs/DEEPSEEK_QUICKSTART.md", "docs/SELF_HOSTING.md", "docs/SECURITY.md"],
+      "setup": "npm install && npm run build",
+      "truth": "Key 只应进入采用者自己的 relay 环境；没有配置真实 provider 时会诚实返回 0 个模型。"
+    },
+    "memory-review": {
+      "label": "可审阅记忆",
+      "summary": "L1/L2/L3 记忆数据、来源证据、启停召回与导入降级规则。",
+      "kind": "standalone",
+      "requires": ["function/localdata"],
+      "imports": ["@fuyue/core/types", "@fuyue/core/repository", "@fuyue/core/snapshot"],
+      "docs": ["docs/CONVERSATION_IMPORT_CONTRACT.md"],
+      "truth": "这是本地记忆账本和审阅机制，不冒充自动成长的服务端蒸馏系统。"
+    },
+    "memory-cloud-client": {
+      "label": "记忆云协议客户端",
+      "summary": "状态、召回、蒸馏与审阅的供应商中立 HTTPS 客户端。",
+      "kind": "standalone",
+      "paths": ["packages/memory-cloud"],
+      "imports": ["@fuyue/memory-cloud"],
+      "truth": "没有服务端、记忆或密钥；认证头必须由采用者在可信环境注入。"
+    },
+    "toybox": {
+      "label": "离线玩具盒",
+      "summary": "单文件 HTML 校验、无网络沙箱、事件审计桥与内置打地鼠。",
+      "kind": "standalone",
+      "paths": ["packages/toybox"],
+      "imports": ["@fuyue/toybox"],
+      "truth": "不开放任意文件系统或 Bash；持久化由采用者自己接入。"
+    },
+    "kaomoji": {
+      "label": "颜文字抽屉",
+      "summary": "可独立安装的颜文字库、抽屉、排序、文件仓库与可选 MCP。",
+      "kind": "standalone",
+      "paths": ["packages/kaomoji-drawer"],
+      "imports": ["@fuyue/kaomoji-drawer", "@fuyue/kaomoji-drawer/styles.css"],
+      "truth": "独立 MIT 包；目录、运行记录和个人常用排序不随公开仓分发。"
+    },
+    "travel-journal": {
+      "label": "旅行手记",
+      "summary": "纯文字 Journey 手记、来源字段和供应商中立旅行回调。",
+      "kind": "standalone",
+      "paths": ["packages/travel-ui"],
+      "imports": ["@fuyue/travel-ui", "@fuyue/travel-ui/styles.css"],
+      "docs": ["docs/UPSTREAM_ADAPTERS.md"],
+      "truth": "不内置现实定位、账号、视觉模型或 Nowhere 世界状态。"
+    },
+    "voice-call": {
+      "label": "电话与全双工语音",
+      "summary": "电话界面、浏览器实时通话、relay 语音桥与 Android Keystore 语音容器。",
+      "kind": "application-slice",
+      "requires": ["function/model-relay", "frontend/app-shell"],
+      "paths": ["android", "capacitor.config.ts"],
+      "imports": ["@fuyue/core/voice"],
+      "docs": ["docs/ANDROID.md", "docs/MOBILE_CONNECTIONS.md", "docs/DEVICE_INTEGRATIONS.md"],
+      "truth": "这是跨 Web、relay 与 Android 的应用切片，不是一个零配置 npm 组件；真实通话仍需要采用者自己的语音 Key。"
+    },
+    "device-calendar": {
+      "label": "设备日历桥",
+      "summary": "PWA 文件导入与 Android 系统日历读写、权限拒绝和来源选择。",
+      "kind": "application-slice",
+      "requires": ["frontend/app-shell"],
+      "paths": ["android", "capacitor.config.ts"],
+      "docs": ["docs/DEVICE_INTEGRATIONS.md", "docs/ANDROID.md"],
+      "truth": "PWA 不能直接取得 iOS EventKit；Android 能力必须在真机授权后才算可用。"
+    },
+    "engawa": {
+      "label": "Engawa 阅读侧廊",
+      "summary": "固定 MIT 上游、回环 sidecar、relay 白名单和阅读前端。",
+      "kind": "integration",
+      "requires": ["function/model-relay", "frontend/app-shell"],
+      "paths": ["scripts/engawa-sidecar.py", "scripts/setup-engawa.mjs", "upstreams/engawa-mcp.lock.json", "licenses/ENGAWA_MCP.txt"],
+      "docs": ["docs/UPSTREAM_ADAPTERS.md"],
+      "truth": "保留上游署名和固定版本；不带任何人的阅读历史、登录态或 Cookie。"
+    },
+    "cobrowse": {
+      "label": "一起看链接",
+      "summary": "公开链接解析、标题摘要、同一聊天模型评论与失败恢复。",
+      "kind": "application-slice",
+      "requires": ["function/model-relay", "frontend/app-shell"],
+      "truth": "不接管站点账号或 Cookie；远端页面拒绝抓取时必须显示真实失败。"
+    }
+  },
+  "frontendPacks": {
+    "ui-kit": {
+      "label": "前端积木总包",
+      "summary": "外观、动效、漂浮物、叠卡、开屏和记忆可视化的共享包。",
+      "kind": "standalone",
+      "requires": ["function/localdata"],
+      "paths": ["packages/ui", "apps/showcase", "apps/web/src/ambient-lines.tsx", "apps/web/src/ambient-shapes.ts"],
+      "imports": ["@fuyue/ui/appearance", "@fuyue/ui/motion", "@fuyue/ui/ambient", "@fuyue/ui/stack-deck", "@fuyue/ui/splash", "@fuyue/ui/memory", "@fuyue/ui/styles.css"],
+      "docs": ["apps/web/DESIGN.md", "licenses/AMBIENT_ICON_SOURCES.md"],
+      "truth": "不包含人物、聊天、密钥或后端；采用者需要自行提供宿主尺寸与 CSS 变量。"
+    },
+    "appearance": {
+      "label": "主题与壳排布",
+      "summary": "六套重点色、独立白天黑夜、纸页/简洁/黑白三种排布注册表。",
+      "kind": "standalone",
+      "requires": ["frontend/ui-kit"],
+      "imports": ["@fuyue/ui/appearance", "@fuyue/ui/styles.css"],
+      "truth": "只带外观 token 与兼容归一化，不会写聊天或人物数据。"
+    },
+    "ambient": {
+      "label": "漂浮物与环境效果",
+      "summary": "雪、雨、爱心、树叶、蝴蝶、星屑、泡泡、萤火和猫爪脚印。",
+      "kind": "standalone",
+      "requires": ["frontend/ui-kit"],
+      "imports": ["@fuyue/ui/ambient", "@fuyue/ui/motion", "@fuyue/ui/styles.css"],
+      "docs": ["licenses/AMBIENT_ICON_SOURCES.md"],
+      "truth": "包含完整运动模型与矢量来源说明；reduced-motion 时不会持续播放动画。"
+    },
+    "motion": {
+      "label": "交互动效节奏",
+      "summary": "按压、切页、面板与强缓动 token，以及 reduced-motion 检测。",
+      "kind": "standalone",
+      "requires": ["frontend/ui-kit"],
+      "imports": ["@fuyue/ui/motion"],
+      "truth": "只有时长、曲线和无障碍检测，不会替宿主自动操纵路由。"
+    },
+    "stack-deck": {
+      "label": "透明叠叠乐",
+      "summary": "第一次原位浮起、第二次进入的书房与房间叠卡。",
+      "kind": "standalone",
+      "requires": ["frontend/ui-kit"],
+      "imports": ["@fuyue/ui/stack-deck", "@fuyue/ui/styles.css"],
+      "truth": "只提供交互和样式；入口数据、返回路由与权限由宿主提供。"
+    },
+    "splash": {
+      "label": "开屏动画",
+      "summary": "可跳过、可改 session key、拒绝存储时也能进入的赴约开屏。",
+      "kind": "standalone",
+      "requires": ["frontend/ui-kit"],
+      "imports": ["@fuyue/ui/splash", "@fuyue/ui/styles.css"],
+      "truth": "默认字样可由采用者替换；不会阻挡 reduced-motion 用户。"
+    },
+    "memory-visual": {
+      "label": "记忆账本与星图前端",
+      "summary": "证据关系、启停召回、字符星图、拖动缩放与点选。",
+      "kind": "standalone",
+      "requires": ["function/memory-review", "frontend/ui-kit"],
+      "imports": ["@fuyue/ui/memory", "@fuyue/ui/styles.css"],
+      "truth": "只渲染采用者传入的数据，不附带记忆服务或演示记忆。"
+    },
+    "travel-screen": {
+      "label": "旅行房前端",
+      "summary": "地点、手记、开门/走走/看看回调和失败空态。",
+      "kind": "standalone",
+      "requires": ["function/travel-journal"],
+      "imports": ["@fuyue/travel-ui", "@fuyue/travel-ui/styles.css"],
+      "truth": "前端不会冒充现实到访或自动连接第三方旅行世界。"
+    },
+    "app-shell": {
+      "label": "五栏完整前端",
+      "summary": "首页、聊天、一起、书房、房间与可搜索全功能抽屉。",
+      "kind": "standalone",
+      "requires": ["function/localdata", "function/toybox", "function/kaomoji", "function/travel-journal", "frontend/ui-kit"],
+      "paths": ["apps/web", "scripts/generate-runtime-notices.mjs"],
+      "truth": "可纯 LocalData 运行；没有 relay 时不会伪造模型回复、日历或心情。"
+    },
+    "chat-surface": {
+      "label": "聊天时间线前端",
+      "summary": "固定输入框、消息操作、收藏/播放/分享、附件与模型状态。",
+      "kind": "application-slice",
+      "requires": ["frontend/app-shell"],
+      "truth": "当前与五栏宿主共享数据和路由，适合作为源码切片拿走，不声明为独立 npm 组件。"
+    }
+  },
+  "profiles": {
+    "whole-home": {
+      "label": "整屋懒人版",
+      "summary": "Web、relay、Android 容器与全部开放实现的完整工作区。",
+      "kind": "complete",
+      "paths": ["apps/web", "apps/relay", "apps/showcase", "android", "packages/core", "packages/ui", "packages/toybox", "packages/kaomoji-drawer", "packages/travel-ui", "packages/memory-cloud", "scripts/engawa-sidecar.py", "scripts/setup-engawa.mjs", "scripts/setup-home.mjs", "scripts/setup-deepseek.mjs", "scripts/dev-all.mjs", "scripts/doctor-relay.mjs", "scripts/generate-runtime-notices.mjs", "upstreams", "licenses", "capacitor.config.ts"],
+      "setup": "npm install && npm run setup && npm run dev:all",
+      "truth": "聊天和语音只有在采用者填入自己的 API Key 并通过状态探测后才算连接。"
+    },
+    "local-home": {
+      "label": "不要后端的本机家",
+      "summary": "保留整壳和 LocalData，不带 relay 或 Android 容器。",
+      "kind": "complete",
+      "requires": ["frontend/app-shell"],
+      "truth": "人物、原文、记忆审阅、房间、玩具、外观和导入导出可本机工作；模型与云同步不可用。"
+    },
+    "frontend-only": {
+      "label": "只拿完整前端",
+      "summary": "五栏 Web / PWA、LocalData 与全部前端积木。",
+      "kind": "complete",
+      "requires": ["frontend/app-shell"],
+      "truth": "可启动纯 LocalData 页面；不带 relay、Android 容器、供应商密钥或任何私人数据。"
+    },
+    "appearance-only": {
+      "label": "只带走外观与交互",
+      "summary": "主题、漂浮物、动效、叠卡、开屏与 Showcase。",
+      "kind": "complete",
+      "requires": ["frontend/appearance", "frontend/ambient", "frontend/motion", "frontend/stack-deck", "frontend/splash"],
+      "truth": "不包含人物、聊天、记忆、房间或密钥。"
+    },
+    "full-source": {
+      "label": "连完整源码一起带走",
+      "summary": "本仓全部公开源码，应直接 clone。",
+      "kind": "complete",
+      "paths": ["."],
+      "takeable": false,
+      "truth": "直接 clone 本仓即可；保留 AGPL-3.0-only 义务，但不包含任何人的私密数据或供应商密钥。"
+    }
+  }
+}

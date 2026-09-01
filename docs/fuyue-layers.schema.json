@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "pack": {
+      "type": "object",
+      "required": ["label", "kind", "truth"],
+      "additionalProperties": false,
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["standalone", "application-slice", "integration", "complete"] },
+        "requires": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^(function|frontend|profile)/[a-z0-9-]+$" }
+        },
+        "paths": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "imports": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "docs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "setup": { "type": "string" },
+        "takeable": { "type": "boolean" },
+        "truth": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "type": "object",
+  "required": ["version", "license", "functionPacks", "frontendPacks", "profiles"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "const": 2 },
+    "license": { "type": "string" },
+    "functionPacks": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/pack" }
+    },
+    "frontendPacks": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/pack" }
+    },
+    "profiles": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/pack" }
+    }
+  }
+}

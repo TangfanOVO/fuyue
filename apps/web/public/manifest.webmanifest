@@ -1,0 +1,16 @@
+{
+  "name": "赴约 LocalData",
+  "short_name": "赴约",
+  "description": "面向本体恋与 AIRP 的本地优先简易小手机。",
+  "lang": "zh-CN",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fbfcfa",
+  "theme_color": "#edf2ee",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

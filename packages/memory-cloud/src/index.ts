@@ -1,0 +1,11 @@
+export interface MemoryCloudStatus { ok: boolean; service: string; detail?: string; }
+export interface MemoryRecallInput { query: string; limit?: number; }
+export interface MemoryCloudHit { id: string; title: string; content: string; score: number; sourceMessageIds: string[]; }
+export interface MemoryCloudOptions { baseUrl: string; fetcher?: typeof fetch; headers?: Record<string, string>; timeoutMs?: number; }
+export class MemoryCloudError extends Error { constructor(message: string, public readonly status = 0) { super(message); this.name = "MemoryCloudError"; } }
+function base(value: string) { const url = new URL(value); if (url.protocol !== "https:" && !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)) throw new Error("memory cloud must use HTTPS unless it is local"); return url.toString().replace(/\/$/, ""); }
+export function createMemoryCloud(options: MemoryCloudOptions) {
+  const root = base(options.baseUrl); const fetcher = options.fetcher || fetch; const timeout = options.timeoutMs || 15_000;
+  async function request<T>(path: string, init?: RequestInit): Promise<T> { const response = await fetcher(`${root}/v1/memory${path}`, { ...init, signal: AbortSignal.timeout(timeout), headers: { Accept: "application/json", "Content-Type": "application/json", ...options.headers, ...init?.headers } }); if (!response.ok) throw new MemoryCloudError(response.status === 401 || response.status === 403 ? "memory cloud authentication failed" : response.status === 429 ? "memory cloud rate limited" : `memory cloud returned ${response.status}`, response.status); return await response.json() as T; }
+  return { status: () => request<MemoryCloudStatus>("/status"), recall: (input: MemoryRecallInput) => request<{ hits: MemoryCloudHit[] }>("/recall", { method: "POST", body: JSON.stringify({ query: input.query, limit: Math.max(1, Math.min(50, input.limit || 12)) }) }), distill: (messageIds: string[]) => request<{ draftIds: string[] }>("/distill", { method: "POST", body: JSON.stringify({ messageIds }) }), review: (memoryId: string, decision: "activate" | "archive") => request<{ id: string; status: string }>("/review", { method: "POST", body: JSON.stringify({ memoryId, decision }) }) };
+}

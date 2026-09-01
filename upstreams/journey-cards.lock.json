@@ -1,0 +1,7 @@
+{
+  "name": "journey-cards",
+  "repository": "https://github.com/nonchaiovo/journey-cards",
+  "commit": "b9a214c8d42b7d9313c517f03249bba783c45553",
+  "license": "MIT",
+  "integration": "text-only LocalData notebook; no visual generation dependency"
+}

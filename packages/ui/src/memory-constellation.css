@@ -1,0 +1,82 @@
+.fuyue-memory-map-real { --panel-solid:var(--paper-raised,#fff);--panel:var(--paper,#f5f0e7);--sub:var(--ink-soft,#6a706a);--hint:var(--ink-soft,#6a706a);--accent-contrast:#fff; }
+.fuyue-memory-map-real > header { margin:14px 2px 9px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px; }
+.fuyue-memory-map-real > header span { display:grid;gap:3px; }.fuyue-memory-map-real > header strong { font-family:ui-serif,Georgia,serif;font-size:1rem; }.fuyue-memory-map-real > header small { color:var(--ink-soft,#6a706a);font-size:.62rem;line-height:1.45; }.fuyue-memory-map-real > header em { color:var(--accent,#7a3437);font-size:.58rem;font-style:normal;white-space:nowrap; }
+.memory-constellation-public-note { margin:0;padding:9px 11px;border:1px dashed var(--line,#d8d8d2);border-radius:11px;color:var(--ink-soft,#6a706a);font-size:.62rem;line-height:1.5; }
+.memory-constellation-section {
+  --memory-signal-rgb: 122,52,55;
+  --memory-canvas-background: color-mix(in srgb,var(--panel-solid,var(--paper-raised,#fff)) 90%,var(--accent-soft,#eadbd6));
+  --memory-node-rgb: 79,68,63;
+  --memory-network-rgb: 112,91,83;
+  --memory-frame: color-mix(in srgb,var(--line,#d8d8d2) 72%,var(--accent,#7a3437));
+  --memory-control-border: color-mix(in srgb,var(--line,#d8d8d2) 76%,var(--accent,#7a3437));
+  --memory-control-background: color-mix(in srgb,var(--panel-solid,var(--paper-raised,#fff)) 92%,transparent);
+  --memory-control-ink: var(--sub,var(--ink-soft,#6a706a));
+  --memory-control-strong: var(--ink,#262626);
+  margin-top: 13px;
+  display: grid;
+  gap: 10px;
+}
+.app-shell[data-theme="blue"] .memory-constellation-section { --memory-signal-rgb:77,115,163;--memory-node-rgb:61,82,109;--memory-network-rgb:89,113,142; }
+.app-shell[data-theme="sakura"] .memory-constellation-section { --memory-signal-rgb:141,91,102;--memory-node-rgb:87,70,75;--memory-network-rgb:125,93,101; }
+.app-shell[data-theme="wisteria"] .memory-constellation-section { --memory-signal-rgb:110,97,121;--memory-node-rgb:74,65,80;--memory-network-rgb:105,94,115; }
+.app-shell[data-theme="tide"] .memory-constellation-section { --memory-signal-rgb:70,111,104;--memory-node-rgb:60,79,75;--memory-network-rgb:82,112,105; }
+.app-shell[data-theme="amber"] .memory-constellation-section { --memory-signal-rgb:134,98,57;--memory-node-rgb:81,69,53;--memory-network-rgb:119,96,66; }
+.app-shell[data-mode="dark"] .memory-constellation-section {
+  --memory-signal-rgb: 205,105,111;
+  --memory-canvas-background: #01050a;
+  --memory-node-rgb: 116,128,141;
+  --memory-network-rgb: 72,84,97;
+  --memory-frame: #20252b;
+  --memory-control-border: #252b32;
+  --memory-control-background: rgba(4,7,11,.9);
+  --memory-control-ink: #aeb6c0;
+  --memory-control-strong: #eef2f7;
+}
+.app-shell[data-theme="blue"][data-mode="dark"] .memory-constellation-section { --memory-signal-rgb:105,166,226; }
+.app-shell[data-theme="sakura"][data-mode="dark"] .memory-constellation-section { --memory-signal-rgb: 214,123,150; }
+.app-shell[data-theme="wisteria"][data-mode="dark"] .memory-constellation-section { --memory-signal-rgb: 157,130,196; }
+.app-shell[data-theme="tide"][data-mode="dark"] .memory-constellation-section { --memory-signal-rgb: 78,166,162; }
+.app-shell[data-theme="amber"][data-mode="dark"] .memory-constellation-section { --memory-signal-rgb: 210,153,87; }
+.app-shell[data-layout="official"] .memory-constellation-section { --memory-signal-rgb:95,98,112;--memory-canvas-background:#fff;--memory-node-rgb:82,83,90;--memory-network-rgb:145,146,154;--memory-frame:#dedee3;--memory-control-border:#d8d8de;--memory-control-background:rgba(255,255,255,.94);--memory-control-ink:#777982;--memory-control-strong:#202126; }
+.memory-constellation { position: relative; height: clamp(460px,64dvh,720px); overflow: hidden; border: 1px solid var(--memory-frame); border-radius: 17px; background: var(--memory-canvas-background); box-shadow: inset 0 1px 0 rgba(255,255,255,.018); }
+.memory-constellation canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+.memory-constellation-fps,.memory-constellation-controls button { border: 1px solid var(--memory-control-border); background: var(--memory-control-background); color: var(--memory-control-ink); font-family: "SFMono-Regular",Menlo,Consolas,monospace; }
+.memory-constellation-fps { position: absolute; left: 10px; bottom: 10px; min-width: 72px; height: 34px; padding: 0 9px; display: flex; align-items: center; gap: 7px; border-radius: 7px; font-size: 10px; letter-spacing: .08em; pointer-events: none; }
+.memory-constellation-fps span { color: var(--memory-control-strong); }
+.memory-constellation-fps i { padding-left: 2px; border-left: 1px solid var(--memory-control-border); color: var(--memory-control-ink); font-style: normal; letter-spacing: 0; }
+.memory-constellation-controls { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 5px; }
+.memory-constellation-controls button { width: 38px; height: 38px; padding: 0; display: grid; place-items: center; border-radius: 7px; cursor: pointer; transition: transform 140ms cubic-bezier(.23,1,.32,1),border-color 140ms ease,color 140ms ease,background-color 140ms ease; }
+.memory-constellation-controls button:active { transform: scale(.97); }
+.memory-constellation-controls button:hover,.memory-constellation-controls button:focus-visible { border-color: rgba(var(--memory-signal-rgb),.5); background: color-mix(in srgb,var(--memory-control-background) 84%,rgb(var(--memory-signal-rgb))); color: var(--memory-control-strong); outline: none; }
+.memory-constellation-detail { padding: 14px; display: grid; gap: 10px; border: 1px solid var(--line); border-radius: 14px; background: color-mix(in srgb,var(--panel-solid) 94%,var(--accent-soft)); color: var(--sub); animation: memory-signal-in 180ms cubic-bezier(.23,1,.32,1) both; }
+.memory-constellation-detail > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.memory-constellation-detail > header div { min-width: 0; display: grid; gap: 3px; }
+.memory-constellation-detail > header small { color: rgb(var(--memory-signal-rgb,0,184,255)); font-family: "SFMono-Regular",Menlo,Consolas,monospace; font-size: 8px; letter-spacing: .12em; }
+.memory-constellation-detail h3 { margin: 0; overflow: hidden; color: var(--ink); font-size: 12px; font-weight: 650; line-height: 1.45; text-overflow: ellipsis; white-space: nowrap; }
+.memory-constellation-detail > header > button { width: 34px; height: 34px; flex: 0 0 auto; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 9px; background: transparent; color: var(--hint); cursor: pointer; }
+.memory-constellation-detail > p { margin: 0; color: var(--sub); font-size: 10px; line-height: 1.65; white-space: pre-wrap; }
+.memory-constellation-detail-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.memory-constellation-detail-tags span { padding: 4px 7px; border: 1px solid var(--line); border-radius: 999px; color: var(--hint); font-size: 8px; }
+.memory-constellation-related { display: grid; gap: 7px; }
+.memory-constellation-related > b { display: flex; align-items: center; gap: 5px; color: rgb(var(--memory-signal-rgb,0,184,255)); font-size: 9px; }
+.memory-constellation-related > div { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }
+.memory-constellation-related button { min-width: 0; padding: 9px; display: grid; gap: 3px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-solid); color: var(--ink); text-align: left; cursor: pointer; }
+.memory-constellation-related button:hover,.memory-constellation-related button:focus-visible { border-color: rgba(var(--memory-signal-rgb,0,184,255),.55); outline: none; }
+.memory-constellation-related strong { overflow: hidden; font-size: 9px; font-weight: 550; text-overflow: ellipsis; white-space: nowrap; }
+.memory-constellation-related small { color: var(--hint); font-size: 7.5px; }
+.memory-constellation-detail > footer { display: flex; justify-content: flex-end; }
+.memory-constellation-detail > footer button { min-height: 36px; padding: 0 11px; display: flex; align-items: center; gap: 5px; border: 1px solid rgba(var(--memory-signal-rgb,0,184,255),.42); border-radius: 10px; background: rgba(var(--memory-signal-rgb,0,184,255),.08); color: rgb(var(--memory-signal-rgb,0,184,255)); font-size: 9px; cursor: pointer; }
+@keyframes memory-signal-in { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 520px) {
+  .fuyue-memory-map-real > header { align-items: flex-start; flex-direction: column; gap: 5px; }
+  .fuyue-memory-map-real > header em { white-space: normal; }
+  .memory-panel .feature-heading { align-items: flex-start; }
+  .memory-heading-actions > button { width: 72px; }
+  .memory-constellation-section { margin-inline: -7px; }
+  .memory-constellation { height: max(500px,62dvh); }
+  .memory-constellation-related > div { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .memory-constellation-detail { animation: none; }
+  .memory-constellation-controls button { transition-property: border-color,color,background-color; }
+}

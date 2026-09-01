@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@fuyue/core": ["../../packages/core/src/index.ts"],
+      "@fuyue/toybox": ["../../packages/toybox/src/index.ts"],
+      "@fuyue/ui/*": ["../../packages/ui/src/*"]
+    },
+    "types": ["vite/client"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts"]
+}

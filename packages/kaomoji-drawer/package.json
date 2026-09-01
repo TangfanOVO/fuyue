@@ -1,0 +1,75 @@
+{
+  "name": "@fuyue/kaomoji-drawer",
+  "version": "0.5.1",
+  "description": "Local-first React kaomoji drawer and optional MCP server with hidden usage ranking, manual curation and Unicode compatibility hints.",
+  "type": "module",
+  "license": "MIT",
+  "homepage": "https://github.com/TangfanOVO/fuyue-kaomoji-drawer#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TangfanOVO/fuyue-kaomoji-drawer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/TangfanOVO/fuyue-kaomoji-drawer/issues"
+  },
+  "keywords": [
+    "kaomoji",
+    "react",
+    "unicode",
+    "emoji-picker",
+    "local-first",
+    "pwa",
+    "mcp",
+    "ai-companion"
+  ],
+  "bin": {
+    "fuyue-kaomoji-mcp": "./dist/mcp-cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./mcp": {
+      "types": "./dist/mcp-server.d.ts",
+      "import": "./dist/mcp-server.js"
+    },
+    "./standalone.js": "./dist/standalone.js",
+    "./styles.css": "./src/styles.css"
+  },
+  "files": [
+    "catalog",
+    "dist",
+    "examples",
+    "src/styles.css",
+    "README.md",
+    "README.en.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && npm run build:standalone && node scripts/build-catalog.mjs",
+    "build:standalone": "esbuild src/standalone.tsx --bundle --minify --format=iife --target=es2020 --outfile=dist/standalone.js --loader:.css=text",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test tests/*.mjs"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.0.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "^2.0.0",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "esbuild": "^0.25.12",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "typescript": "^5.9.3"
+  }
+}

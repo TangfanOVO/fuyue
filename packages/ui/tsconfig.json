@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": { "@fuyue/core": ["../core/src/index.ts"] }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}
