@@ -19,6 +19,6 @@ test("cloud relay ships only the relay, requires a private code, and has an unau
   assert.match(blueprint, /FUYUE_DEEPSEEK_API_KEY\n\s+sync: false/);
   assert.match(blueprint, /healthCheckPath: \/healthz/);
   assert.match(server, /url\.pathname === "\/healthz"/);
-  assert.match(readme, /这颗按钮只部署模型转发/);
+  assert.match(readme, /这颗按钮部署模型转发/);
   assert.doesNotMatch(blueprint, /sk-[A-Za-z0-9_-]{20,}/);
 });

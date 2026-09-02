@@ -9,16 +9,17 @@
 
 ## 先选一条路
 
-| 我想要 | 最短做法 | 会不会自动更新 | 能不能用系统能力 |
+| 我想要 | 最短做法 | 资料放在哪里 | 更新方式 |
 | --- | --- | --- | --- |
-| 先看看长什么样 | 打开[在线预览](https://tangfanovo.github.io/fuyue/)；不填连接时只运行 LocalData | 是 | 浏览器允许的范围内 |
-| iPhone / iPad 使用 | Safari 打开预览，分享 → 添加到主屏幕 | 是 | 相册、麦克风等 Web 权限；没有 Android Calendar Provider / Keystore |
-| Android 普通使用 | Chrome 打开预览，菜单 → 安装应用；不需要另下 APK | 是 | 同上，适合绝大多数人先体验 |
-| Android 原生直连 | 从 [Releases](https://github.com/TangfanOVO/fuyue/releases) 安装测试 APK | 否，更新需装新包 | 多 Android Keystore、系统日历与原生返回 |
-| 自己接 API 聊天 | 下载源码后运行 `npm install && npm run setup && npm run dev:all` | 由自己部署 | Key 只进 relay；Android 也可走 Keystore |
-| 只拿漂浮物 / 星图 / 叠卡 | 先看 [Showcase](https://tangfanovo.github.io/fuyue/showcase/)，再用 `npm run packs:list` | 跟随自己的项目 | 按所取积木决定 |
+| 先看看长什么样 | 打开[在线预览](https://tangfanovo.github.io/fuyue/) | 当前浏览器的 LocalData | 页面自动更新 |
+| iPhone / iPad 使用 | Safari 打开预览，分享 → 添加到主屏幕 | 当前设备的浏览器 LocalData | PWA 自动更新 |
+| Android 普通使用 | Chrome 打开预览，菜单 → 安装应用 | 当前设备的浏览器 LocalData | PWA 自动更新 |
+| Android 原生直连 | 从 [Releases](https://github.com/TangfanOVO/fuyue/releases) 安装 APK | 应用 LocalData；API Key 在 Android Keystore | 安装同签名新版本 |
+| 有自己的电脑或云 | 下载源码运行 `npm run setup && npm run dev:all`，或把 relay 部署到自己的服务器 | 家仍在手机；API Key 在自己的 relay | 自己管理服务 |
+| 没有服务器，只用手机 | 点下面的 Render 按钮托管私人 relay | 家仍在手机；API Key 在私人 relay | 托管平台更新 relay |
+| 只拿漂浮物 / 星图 / 叠卡 | 先看 [Showcase](https://tangfanovo.github.io/fuyue/showcase/)，再用 `npm run packs:list` | 跟随自己的项目 | 跟随自己的项目 |
 
-Pages 是可安装的静态 PWA，不会托管任何人的 API Key，也没有公共免费 relay。在线预览中的资料只保存在当前浏览器；清除站点数据会清掉它。完整自托管、备份和安全边界放在 `docs/`，README 只保留第一次使用真正需要的路径。
+赴约把“家”和“模型连接”分开：人物、聊天、记忆、信件、空间、心情与外观保存在使用设备的 LocalData；relay 只负责带着服务器里的 API Key 请求模型。完整 `fuyue-portable` 可以把 LocalData 搬到另一台设备；网站换了域名时，也可以用它把原来的家带过去。
 
 ## 只用手机：一键部署私人 relay
 
@@ -26,7 +27,7 @@ Pages 是可安装的静态 PWA，不会托管任何人的 API Key，也没有�
 
 点按钮后用 GitHub 登录，填两样：至少 16 位的私人接入码和 DeepSeek API Key。几分钟后复制 Render 给出的 `https://...onrender.com` 地址，回到赴约的“模型连接 → 手机服务”，填同一个接入码即可。
 
-这颗按钮只部署模型转发，不上传 LocalData、聊天、记忆或人设。免费服务可能休眠；重启后最多需重新输入接入码，手机里的资料不会因此丢失。想换 Gemini、OpenAI、Anthropic、GLM、Qwen、Kimi 或 OpenRouter，在 Render 的 Environment 里换成[自托管说明](./docs/SELF_HOSTING.md)中对应的环境变量。
+这颗按钮部署模型转发，LocalData、聊天、记忆和人设继续留在使用赴约的设备上。托管服务重启后重新输入接入码即可接回原来的家。想换 Gemini、OpenAI、Anthropic、GLM、Qwen、Kimi 或 OpenRouter，在 Render 的 Environment 里换成[自托管说明](./docs/SELF_HOSTING.md)中对应的环境变量。
 
 ## 模型支持
 
