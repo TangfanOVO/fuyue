@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: fuyue-relay
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: FUYUE_RELAY_HOST
+        value: 0.0.0.0
+      - key: FUYUE_RELAY_PORT
+        value: 10000
+      - key: FUYUE_TRUSTED_PROXY
+        value: "1"
+      - key: FUYUE_REQUIRE_ACCESS_CODE
+        value: "1"
+      - key: FUYUE_ALLOWED_ORIGINS
+        value: https://tangfanovo.github.io
+      - key: FUYUE_ACCESS_CODE
+        sync: false
+      - key: FUYUE_ACTIVE_PROVIDER
+        value: deepseek
+      - key: FUYUE_DEEPSEEK_API_KEY
+        sync: false

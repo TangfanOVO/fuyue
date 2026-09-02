@@ -148,6 +148,7 @@ test("PWA duplex websocket keeps the provider key in relay and forwards only bou
 test("configuration refuses accidental public binding", () => {
   assert.throws(() => loadConfig({ FUYUE_RELAY_HOST: "0.0.0.0" }), /Refusing a public bind/);
   assert.throws(() => loadConfig({ FUYUE_ACCESS_CODE: "too-short" }), /at least 16/);
+  assert.throws(() => loadConfig({ FUYUE_REQUIRE_ACCESS_CODE: "1" }), /requires FUYUE_ACCESS_CODE/);
 });
 
 test("README relay path accepts the complete client-tool contract and reaches its upstream", async (context) => {
@@ -440,6 +441,9 @@ test("phone access code becomes an HttpOnly session and is rate-bound", async (c
   const address = await relay.listen();
   context.after(() => new Promise((resolve) => relay.server.close(resolve)));
   const baseUrl = `http://127.0.0.1:${address.port}`;
+  const health = await fetch(`${baseUrl}/healthz`);
+  assert.equal(health.status, 200);
+  assert.deepEqual(await health.json(), { ok: true, service: "fuyue-self-hosted-relay" });
   assert.equal((await fetch(`${baseUrl}/v1/status`)).status, 401);
   assert.equal((await fetch(`${baseUrl}/v1/session/exchange`, { method: "POST", headers: { "content-type": "application/json", origin: "http://127.0.0.1:4173" }, body: JSON.stringify({ code: "wrong" }) })).status, 401);
   const exchange = await fetch(`${baseUrl}/v1/session/exchange`, { method: "POST", headers: { "content-type": "application/json", origin: "http://127.0.0.1:4173" }, body: JSON.stringify({ code: "phone-access-code-1234" }) });

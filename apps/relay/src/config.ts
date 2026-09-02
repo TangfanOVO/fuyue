@@ -59,6 +59,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): RelayConfig {
   if (!loopback && allowedOrigins.size === 0) throw new Error("A public relay requires FUYUE_ALLOWED_ORIGINS");
   const accessCode = env.FUYUE_ACCESS_CODE?.trim() || "";
   if (accessCode && accessCode.length < 16) throw new Error("FUYUE_ACCESS_CODE must contain at least 16 characters");
+  if (env.FUYUE_REQUIRE_ACCESS_CODE === "1" && !accessCode) throw new Error("This deployment requires FUYUE_ACCESS_CODE");
 
   const providers: ProviderConfig[] = [];
   const deepseekKey = env.FUYUE_DEEPSEEK_API_KEY?.trim() || env.DEEPSEEK_API_KEY?.trim() || "";

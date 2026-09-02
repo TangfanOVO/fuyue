@@ -304,6 +304,7 @@ body:has(.feature-drawer) { overflow: hidden; }
 .mobile-connect-lead small { color: var(--accent); font-size: .68rem; font-weight: 800; }
 .mobile-connect-lead h2 { margin: 4px 0 7px; font-family: "Songti SC", "Noto Serif SC", serif; font-size: 1.15rem; }
 .mobile-connect-lead p { margin: 0; color: var(--ink-soft); font-size: .76rem; line-height: 1.6; }
+.deploy-relay-link { margin-top: 12px; text-decoration: none; }
 .setup-steps { display: grid; gap: 1px; margin: 14px 0; padding: 0; list-style: none; border-block: 1px solid var(--line); }
 .setup-steps li { min-width: 0; display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 2px 10px; align-items: center; padding: 12px 2px; border-top: 1px solid var(--line); }
 .setup-steps li:first-child { border-top: 0; }

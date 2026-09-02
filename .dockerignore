@@ -1,0 +1,10 @@
+**
+!package.json
+!package-lock.json
+!tsconfig.base.json
+!apps/
+!apps/relay/
+!apps/relay/**
+!packages/
+!packages/core/
+!packages/core/**

@@ -118,6 +118,16 @@ ChatGPT 或 Google AI 消费订阅不是这里的 API Key，不要把浏览器 C
 
 ## 远程部署
 
+### 只用手机：Render 按钮
+
+README 的 **Deploy relay to Render** 会从根目录 `Dockerfile` 只构建 `packages/core` 和 `apps/relay`。Render 首次创建时会要求填写 `FUYUE_ACCESS_CODE` 与 `FUYUE_DEEPSEEK_API_KEY`；它们是运行时 Secret，不会写进仓库或镜像。
+
+成功后复制 Render 的 HTTPS 地址，在赴约“模型连接 → 手机服务”中输入地址和同一个接入码。容器不持有 LocalData；它休眠或重启不会删除手机里的聊天、记忆或人设，但进程内的 HttpOnly 会话会失效，需重新用接入码连接。
+
+iPhone / iPad 的 LocalData 位于安装 PWA 所使用的网站 Origin 对应的浏览器存储，不在 Render。平台提供的 HTTPS 域名就能使用，并非必须购买自有域名；但不要随意从 GitHub Pages 换到另一个域名，因为不同 Origin 会看到不同的本地资料库。清除网站数据、删除对应浏览器资料或系统回收存储仍可能造成丢失，长期使用应定期导出完整 `fuyue-portable` 备份。
+
+默认只允许 `https://tangfanovo.github.io` 这个 Origin。如果部署者使用自己 fork 后的 Pages 或自定义网站，必须把 Render 里的 `FUYUE_ALLOWED_ORIGINS` 改成自己网站的 Origin（只到域名，不带路径和末尾斜杠）。
+
 参考服务器只提供可选的单接入码会话，不是公众账号系统。公网部署必须满足：
 
 1. relay 放在带登录或单点鉴权的 HTTPS 反向代理后面。

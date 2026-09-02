@@ -20,6 +20,14 @@
 
 Pages 是可安装的静态 PWA，不会托管任何人的 API Key，也没有公共免费 relay。在线预览中的资料只保存在当前浏览器；清除站点数据会清掉它。完整自托管、备份和安全边界放在 `docs/`，README 只保留第一次使用真正需要的路径。
 
+## 只用手机：一键部署私人 relay
+
+[![Deploy relay to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/TangfanOVO/fuyue)
+
+点按钮后用 GitHub 登录，填两样：至少 16 位的私人接入码和 DeepSeek API Key。几分钟后复制 Render 给出的 `https://...onrender.com` 地址，回到赴约的“模型连接 → 手机服务”，填同一个接入码即可。
+
+这颗按钮只部署模型转发，不上传 LocalData、聊天、记忆或人设。免费服务可能休眠；重启后最多需重新输入接入码，手机里的资料不会因此丢失。想换 Gemini、OpenAI、Anthropic、GLM、Qwen、Kimi 或 OpenRouter，在 Render 的 Environment 里换成[自托管说明](./docs/SELF_HOSTING.md)中对应的环境变量。
+
 ## 模型支持
 
 | 路径 | 当前证据 | 首个 beta 的口径 |

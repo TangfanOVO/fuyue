@@ -7,6 +7,7 @@ import {
   ChatsCircle,
   CheckCircle,
   ClockCounterClockwise,
+  CloudArrowUp,
   CloudSlash,
   Database,
   DownloadSimple,
@@ -5248,6 +5249,15 @@ function ConnectionPanel({
               </p>
             </span>
           </section>
+          <a
+            className="secondary-button full-button deploy-relay-link"
+            href="https://render.com/deploy?repo=https://github.com/TangfanOVO/fuyue"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <CloudArrowUp />
+            没有服务？一键部署私人 relay
+          </a>
           <form className="editor-form" onSubmit={save}>
             <label>
               服务地址

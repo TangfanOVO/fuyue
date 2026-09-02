@@ -2,6 +2,12 @@
 
 Android 与 iPhone PWA 使用同一份 `apps/web` 前端和同一份 `fuyue-portable` LocalData。`android/` 只增加原生容器与设备边界，不维护第二套页面。
 
+## 资料放在哪里、更新会不会丢
+
+APK 把 LocalData 放在 Android 应用自己的 WebView / IndexedDB 沙箱里，不上传到 relay。使用同一包名和同一签名直接覆盖安装新版，Android 通常会保留这份应用数据；**先卸载再安装会清空应用沙箱**，而且本项目主动关闭了 Android 云备份，不能把系统自动恢复当成保障。
+
+换机、卸载或清除应用数据前，先从“本地副本”导出完整 `fuyue-portable` JSON。完整副本包含人物、记忆、聊天原文、信件/空间/时间线等房间条目、玩具活动与外观设置；只迁移记忆文件不会顺带恢复其他内容。API Key、推送订阅和本机录音文件不进入这份 JSON，需要在新设备重新配置或另行保存。
+
 ## 使用者：拿 Key 直连
 
 安装 APK 后进入“模型连接 → Android 直连”：

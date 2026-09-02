@@ -143,6 +143,9 @@ export function createRelayServer(config: RelayConfig, fetcher: typeof fetch = f
     }
     const url = new URL(request.url || "/", "http://relay.local");
     try {
+      if (request.method === "GET" && url.pathname === "/healthz") {
+        json(response, 200, { ok: true, service: config.serviceName }); return;
+      }
       if (request.method === "POST" && url.pathname === "/v1/session/exchange") {
         if (!config.accessCode) { detail(response, 404, "这个 relay 没有启用接入码"); return; }
         const address = request.socket.remoteAddress || "unknown"; const now = Date.now(); const attempt = failedAccess.get(address);

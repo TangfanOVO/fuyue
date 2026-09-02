@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 
 const sourceRoot = fileURLToPath(new URL("..", import.meta.url));
-const allowedTopLevel = new Set([".github", ".gitignore", "LICENSE", "PUBLICATION_BOUNDARY.md", "README.md", "THIRD_PARTY_NOTICES.md", "android", "apps", "capacitor.config.ts", "docs", "fuyue.layers.json", "licenses", "package-lock.json", "package.json", "packages", "scripts", "tsconfig.base.json", "upstreams"]);
+const allowedTopLevel = new Set([".dockerignore", ".github", ".gitignore", "Dockerfile", "LICENSE", "PUBLICATION_BOUNDARY.md", "README.md", "THIRD_PARTY_NOTICES.md", "android", "apps", "capacitor.config.ts", "docs", "fuyue.layers.json", "licenses", "package-lock.json", "package.json", "packages", "render.yaml", "scripts", "tsconfig.base.json", "upstreams"]);
 const ignored = new Set([".DS_Store", ".gradle", "build", "dist", "node_modules", "coverage"]);
 const blockedExtensions = new Set([".db", ".dump", ".enc", ".jks", ".key", ".keystore", ".p12", ".pem", ".sqlite", ".sqlite3", ".tar", ".gz", ".zip"]);
 const runFile = promisify(execFile);
