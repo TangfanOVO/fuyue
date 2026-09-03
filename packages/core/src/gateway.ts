@@ -192,6 +192,16 @@ function requestSignal(signal: AbortSignal | undefined, timeoutMs: number): Abor
   const timeout = AbortSignal.timeout(timeoutMs);
   return signal ? AbortSignal.any([signal, timeout]) : timeout;
 }
+const relaySessionTokens = new Map<string, string>();
+function sessionStorageKey(baseUrl: string): string { return `fuyue.relay-session:${baseUrl}`; }
+function readSessionToken(baseUrl: string): string {
+  const memory = relaySessionTokens.get(baseUrl); if (memory) return memory;
+  try { return globalThis.sessionStorage?.getItem(sessionStorageKey(baseUrl)) || ""; } catch { return ""; }
+}
+function writeSessionToken(baseUrl: string, token: string): void {
+  if (token) relaySessionTokens.set(baseUrl, token); else relaySessionTokens.delete(baseUrl);
+  try { if (token) globalThis.sessionStorage?.setItem(sessionStorageKey(baseUrl), token); else globalThis.sessionStorage?.removeItem(sessionStorageKey(baseUrl)); } catch { /* Memory fallback still works. */ }
+}
 function object(value: unknown): Record<string, unknown> | null { return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : null; }
 function validStatus(value: unknown): GatewayStatus {
   const item = object(value); const providers = item?.providers; const capabilities = item?.capabilities;
@@ -363,9 +373,13 @@ export class RelayApiClient implements CompanionGateway, VoiceGateway {
     this.fetcher = fetcher ?? globalThis.fetch.bind(globalThis);
   }
 
+  get sessionToken(): string { return readSessionToken(this.baseUrl); }
+
   private async request(input: string, init: RequestInit): Promise<Response> {
     try {
-      return await this.fetcher(input, init);
+      const headers = new Headers(init.headers); const token = this.sessionToken;
+      if (token) headers.set("Authorization", `Bearer ${token}`);
+      return await this.fetcher(input, { ...init, headers });
     } catch (cause) {
       if (cause instanceof DOMException && cause.name === "AbortError") throw cause;
       if (cause instanceof Error && cause.name === "TimeoutError") {
@@ -390,20 +404,25 @@ export class RelayApiClient implements CompanionGateway, VoiceGateway {
   }
 
   async exchangeAccessCode(code: string, signal?: AbortSignal): Promise<void> {
+    let bearer = true;
+    try { bearer = !globalThis.location || new URL(this.baseUrl).origin !== globalThis.location.origin; } catch { /* Non-browser clients use bearer. */ }
     const response = await this.request(`${this.baseUrl}/v1/session/exchange`, {
       method: "POST",
       headers: { Accept: "application/json", "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ code }),
+      body: JSON.stringify({ code, ...(bearer ? { bearer: true } : {}) }),
       signal: requestSignal(signal, 15_000),
     });
     if (!response.ok) throw await responseError(response);
+    const result = object(await response.json()); const token = result?.sessionToken;
+    writeSessionToken(this.baseUrl, bearer && typeof token === "string" && /^[A-Za-z0-9_-]{32,256}$/.test(token) ? token : "");
   }
 
   async revokeSession(signal?: AbortSignal): Promise<void> {
-    const response = await this.request(`${this.baseUrl}/v1/session/logout`, {
+    let response: Response;
+    try { response = await this.request(`${this.baseUrl}/v1/session/logout`, {
       method: "POST", credentials: "include", signal: requestSignal(signal, 10_000),
-    });
+    }); } finally { writeSessionToken(this.baseUrl, ""); }
     if (!response.ok) throw await responseError(response);
   }
 

@@ -117,9 +117,10 @@ test("PWA duplex websocket keeps the provider key in relay and forwards only bou
       if (message.type === "speech_text_buffer.commit") resolveSpeechForwarded();
     });
   });
-  const config = loadConfig({ FUYUE_DOUBAO_DUPLEX_API_KEY: "voice-secret", FUYUE_DOUBAO_DUPLEX_VOICE: "voice-id", FUYUE_DOUBAO_DUPLEX_ENDPOINT: `ws://127.0.0.1:${providerPort}` });
+  const config = loadConfig({ FUYUE_ACCESS_CODE: "phone-access-code-1234", FUYUE_DOUBAO_DUPLEX_API_KEY: "voice-secret", FUYUE_DOUBAO_DUPLEX_VOICE: "voice-id", FUYUE_DOUBAO_DUPLEX_ENDPOINT: `ws://127.0.0.1:${providerPort}` });
   config.port = 0; const relay = createRelayServer(config); const address = await relay.listen();
-  const client = new WebSocket(`ws://127.0.0.1:${address.port}/v1/voice/live`, { headers: { Origin: "http://127.0.0.1:4173" } });
+  const exchange = await fetch(`http://127.0.0.1:${address.port}/v1/session/exchange`, { method: "POST", headers: { "content-type": "application/json", origin: "http://127.0.0.1:4173" }, body: JSON.stringify({ code: "phone-access-code-1234", bearer: true }) }).then((response) => response.json());
+  const client = new WebSocket(`ws://127.0.0.1:${address.port}/v1/voice/live`, [`fuyue-session.${exchange.sessionToken}`], { headers: { Origin: "http://127.0.0.1:4173" } });
   context.after(async () => {
     if (client.readyState !== WebSocket.CLOSED) { client.terminate(); await new Promise((resolve) => setImmediate(resolve)); }
     relay.server.closeAllConnections(); await new Promise((resolve) => relay.server.close(resolve));
@@ -434,7 +435,7 @@ test("mainstream compatible presets and Anthropic stay server-side", () => {
   assert.ok(config.providers.every((item) => item.apiKey.endsWith("secret")));
 });
 
-test("phone access code becomes an HttpOnly session and is rate-bound", async (context) => {
+test("phone access code supports both HttpOnly cookie and Safari bearer sessions", async (context) => {
   const config = loadConfig({ FUYUE_RELAY_PORT: "8787", FUYUE_ACCESS_CODE: "phone-access-code-1234" });
   config.port = 0;
   const relay = createRelayServer(config);
@@ -448,15 +449,25 @@ test("phone access code becomes an HttpOnly session and is rate-bound", async (c
   assert.equal(missingSession.status, 401);
   assert.match((await missingSession.json()).detail, /休眠中恢复.*重新输入接入码/);
   assert.equal((await fetch(`${baseUrl}/v1/session/exchange`, { method: "POST", headers: { "content-type": "application/json", origin: "http://127.0.0.1:4173" }, body: JSON.stringify({ code: "wrong" }) })).status, 401);
-  const exchange = await fetch(`${baseUrl}/v1/session/exchange`, { method: "POST", headers: { "content-type": "application/json", origin: "http://127.0.0.1:4173" }, body: JSON.stringify({ code: "phone-access-code-1234" }) });
+  const cookieExchange = await fetch(`${baseUrl}/v1/session/exchange`, { method: "POST", headers: { "content-type": "application/json", origin: "http://127.0.0.1:4173" }, body: JSON.stringify({ code: "phone-access-code-1234" }) });
+  assert.deepEqual(await cookieExchange.clone().json(), { ok: true });
+  assert.match(cookieExchange.headers.get("set-cookie"), /HttpOnly/);
+  const exchange = await fetch(`${baseUrl}/v1/session/exchange`, { method: "POST", headers: { "content-type": "application/json", origin: "http://127.0.0.1:4173" }, body: JSON.stringify({ code: "phone-access-code-1234", bearer: true }) });
   assert.equal(exchange.status, 200);
+  const session = await exchange.json();
+  assert.match(session.sessionToken, /^[A-Za-z0-9_-]{32,256}$/);
   const sessionCookie = exchange.headers.get("set-cookie");
   assert.match(sessionCookie, /HttpOnly/);
   assert.doesNotMatch(sessionCookie, /phone-access-code/);
   const authenticated = await fetch(`${baseUrl}/v1/status`, { headers: { cookie: sessionCookie.split(";")[0] } });
   assert.equal(authenticated.status, 200);
-  const logout = await fetch(`${baseUrl}/v1/session/logout`, { method: "POST", headers: { cookie: sessionCookie.split(";")[0] } });
+  const bearerAuthenticated = await fetch(`${baseUrl}/v1/status`, { headers: { authorization: `Bearer ${session.sessionToken}` } });
+  assert.equal(bearerAuthenticated.status, 200);
+  const preflight = await fetch(`${baseUrl}/v1/status`, { method: "OPTIONS", headers: { origin: "http://127.0.0.1:4173" } });
+  assert.match(preflight.headers.get("access-control-allow-headers"), /Authorization/);
+  const logout = await fetch(`${baseUrl}/v1/session/logout`, { method: "POST", headers: { authorization: `Bearer ${session.sessionToken}` } });
   assert.equal(logout.status, 200);
   assert.match(logout.headers.get("set-cookie"), /Max-Age=0/);
   assert.equal((await fetch(`${baseUrl}/v1/status`, { headers: { cookie: sessionCookie.split(";")[0] } })).status, 401);
+  assert.equal((await fetch(`${baseUrl}/v1/status`, { headers: { authorization: `Bearer ${session.sessionToken}` } })).status, 401);
 });

@@ -31,7 +31,7 @@ npm run dev:relay
 
 ## 只用手机的订阅接入
 
-公开前端支持“服务地址 + 订阅接入码”。服务端配置 `FUYUE_ACCESS_CODE` 后，PWA 会把接入码交换成 HttpOnly 会话，成功后不保存接入码：
+公开前端支持“服务地址 + 订阅接入码”。服务端配置 `FUYUE_ACCESS_CODE` 后，PWA 会把接入码交换成安全会话，成功后不保存接入码：
 
 ```dotenv
 FUYUE_ACCESS_CODE=至少十六个字符的随机接入码
@@ -124,7 +124,7 @@ ChatGPT 或 Google AI 消费订阅不是这里的 API Key，不要把浏览器 C
 
 README 的 **Deploy relay to Render** 会从根目录 `Dockerfile` 只构建 `packages/core` 和 `apps/relay`。Render 首次创建时会要求填写 `FUYUE_ACCESS_CODE` 与 `FUYUE_DEEPSEEK_API_KEY`；它们是运行时 Secret，不会写进仓库或镜像。
 
-成功后复制 Render 的 HTTPS 地址，在赴约“模型连接 → 手机服务”中输入地址和同一个接入码。容器不持有 LocalData；它休眠或重启不会删除手机里的聊天、记忆或人设，但进程内的 HttpOnly 会话会失效，需重新用接入码连接。
+成功后复制 Render 的 HTTPS 地址，在赴约“模型连接 → 手机服务”中输入地址和同一个接入码。容器不持有 LocalData；它休眠或重启不会删除手机里的聊天、记忆或人设，但进程内会话会失效，需重新用接入码连接。Safari 阻止 GitHub Pages 与 Render 之间的跨站 Cookie 时，前端会自动使用只保留在当前浏览器会话中的 bearer；关闭该浏览器会话后重新输入接入码即可。
 
 iPhone / iPad 的 LocalData 位于安装 PWA 所使用的网站 Origin 对应的浏览器存储，不在 Render。平台提供的 HTTPS 域名就能使用，不要求另买域名；如果以后换域名，用完整 `fuyue-portable` 把原来 Origin 里的资料导入新地址即可。
 

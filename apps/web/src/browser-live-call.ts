@@ -77,13 +77,13 @@ function playPcm(session: LiveSession, encoded: string): void {
   source.start(session.playAt); session.playAt += buffer.duration; session.sources.add(source); source.onended = () => session.sources.delete(source);
 }
 
-export async function startBrowserLiveCall({ relayUrl, instructions, onEvent }: {
-  relayUrl: string; instructions: string; onEvent: (event: NativeLiveCallEvent) => void;
+export async function startBrowserLiveCall({ relayUrl, sessionToken, instructions, onEvent }: {
+  relayUrl: string; sessionToken?: string; instructions: string; onEvent: (event: NativeLiveCallEvent) => void;
 }): Promise<BrowserLiveCallController> {
   if (!navigator.mediaDevices?.getUserMedia) throw new Error("这个浏览器没有实时麦克风能力");
   const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
   const context = new AudioContext(); await context.resume();
-  const socket = new WebSocket(websocketUrl(relayUrl));
+  const socket = sessionToken ? new WebSocket(websocketUrl(relayUrl), [`fuyue-session.${sessionToken}`]) : new WebSocket(websocketUrl(relayUrl));
   const source = context.createMediaStreamSource(stream); const silent = context.createGain(); silent.gain.value = 0;
   const session: LiveSession = { socket, context, stream, source, processor: null as unknown as AudioWorkletNode, silent, sources: new Set(), playAt: 0, byteCarry: null, muted: false, stopped: false, bargeAt: 0, bargePending: false, discardAudio: false, awaitingNewPlayback: false };
   const cancelForBarge = () => {

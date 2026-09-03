@@ -93,10 +93,10 @@ function currentCallHistory(turns: CallTurn[]) {
 
 function fallbackPerson(id: "user" | "companion", displayName: string): PersonProfile { return { id, displayName, signature: "", avatarDataUrl: null, bio: "", voiceNotes: "", updatedAt: new Date(0).toISOString() }; }
 
-export function VoiceCallPanel({ repository, conversation, messages, people, memories, roomEntries, calendarItems, companionName, chatGateway, voiceGateway, gatewayStatus, nativeAvailable, relayUrl, onBack, onChange, onDeviceChange, onOpenConnection }: {
+export function VoiceCallPanel({ repository, conversation, messages, people, memories, roomEntries, calendarItems, companionName, chatGateway, voiceGateway, gatewayStatus, nativeAvailable, relayUrl, relaySessionToken, onBack, onChange, onDeviceChange, onOpenConnection }: {
   repository: LocalDataRepository; conversation: Conversation; messages: Message[]; people: PersonProfile[]; memories: MemoryItem[]; roomEntries: RoomEntry[]; calendarItems: LifeOverviewItem[]; companionName: string;
   chatGateway: CompanionGateway | null; voiceGateway: VoiceGateway | null; gatewayStatus: GatewayStatus | null; nativeAvailable: boolean;
-  relayUrl: string;
+  relayUrl: string; relaySessionToken: string;
   onBack: () => void; onChange: () => Promise<void>; onDeviceChange: () => Promise<void>; onOpenConnection: () => void;
 }) {
   const [stage, setStage] = useState<CallStage>("idle"); const [status, setStatus] = useState<VoiceStatus | null>(null); const [nativeState, setNativeState] = useState<NativeVoiceState | null>(null);
@@ -219,7 +219,7 @@ export function VoiceCallPanel({ repository, conversation, messages, people, mem
   async function startBrowserFullDuplex() {
     if (stage !== "idle") return; if (!chatGateway) { setError("先连接一个聊天模型，relay 语音只负责实时听和说。"); return; } resetCallTurns(); setError(""); setNotice(""); setPartial(""); setMuted(false); setTranscriptOpen(false); setElapsedSeconds(0); callStartedAtRef.current = Date.now(); setStage("connecting");
     try {
-      const controller = await startBrowserLiveCall({ relayUrl, instructions: fullDuplexInstructions(), onEvent: handleNativeLiveEvent });
+      const controller = await startBrowserLiveCall({ relayUrl, sessionToken: relaySessionToken, instructions: fullDuplexInstructions(), onEvent: handleNativeLiveEvent });
       browserLiveRef.current = controller; nativeLiveActive.current = true;
       nativeLiveTimerRef.current = window.setTimeout(() => void stopEverything(), 20 * 60_000); setStage("live");
     } catch (cause) { if (nativeLiveTimerRef.current !== null) window.clearTimeout(nativeLiveTimerRef.current); nativeLiveTimerRef.current = null; browserLiveRef.current = null; nativeLiveActive.current = false; callStartedAtRef.current = 0; setError(cause instanceof Error ? cause.message : "relay 全双工电话没有开始"); setStage("idle"); }

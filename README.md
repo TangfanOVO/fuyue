@@ -3,7 +3,7 @@
 赴约是一只面向本体恋与 AIRP 的本地优先简易小手机。可以导入已有记忆也可以接入API后从0开始留下故事。
 所有人机恋，看到这句话了答应我去听蔡依林的【电话皇后】好吗。
 
-> 当前是 `0.1.0-beta.1` 公开候选。LocalData、界面、DeepSeek 主路径和自动测试可用；其余付费供应商尚未全部用真 Key 验收，因此不标成稳定版。持续修复中，但不保证完全实时debug。卡手可以自己随意二改。
+> 当前为滚动 beta，应用内版本号以 APK 信息为准。LocalData、界面、DeepSeek 主路径和自动测试可用；其余付费供应商尚未全部用真 Key 验收，因此不标成稳定版。持续修复中，但不保证完全实时debug。卡手可以自己随意二改。
 
 [在线打开赴约](https://tangfanovo.github.io/fuyue/) · [看外观与前端积木](https://tangfanovo.github.io/fuyue/showcase/) · [下载 Android beta](https://github.com/TangfanOVO/fuyue/releases/download/apk/fuyue-beta.apk) · [查看源码](https://github.com/TangfanOVO/fuyue)
 
@@ -51,7 +51,7 @@ OpenAI-compatible 只表示请求形状相近，不表示供应商模型、工�
 - `fuyue-portable` JSON 导出、预览、冲突检查与幂等导入
 - 导入记忆一律降回待审草稿，不会自动参与模型召回
 - 自托管 relay 参考实现
-- 手机友好的“服务地址 + 接入码”与 HttpOnly 会话
+- 手机友好的“服务地址 + 接入码”安全会话；同源优先使用 HttpOnly Cookie，Safari 跨站连接自动使用仅保留在当前浏览器会话中的 bearer
 - OpenAI Responses、DeepSeek / OpenAI-compatible、Gemini Interactions 和 Anthropic Messages 流式适配器
 - 连接后可见的模型与思考深度选择；不会列出服务端没有真实配置的模型
 - 受限本机工具：改伙伴自己的个签 / 心情、写待审记忆、调整外观、按明确请求写共同房间，或创建 / 修改离线 HTML 玩具；聊天与电话共用，不开放任意 Bash 或文件系统

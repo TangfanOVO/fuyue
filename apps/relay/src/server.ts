@@ -97,6 +97,17 @@ function cookie(request: IncomingMessage, name: string): string {
   }
   return "";
 }
+function bearer(request: IncomingMessage): string {
+  const match = /^Bearer ([A-Za-z0-9_-]{32,256})$/.exec(request.headers.authorization || "");
+  return match?.[1] || "";
+}
+function websocketBearer(request: IncomingMessage): string {
+  const protocol = String(request.headers["sec-websocket-protocol"] || "").split(",").map((item) => item.trim()).find((item) => item.startsWith("fuyue-session."));
+  return protocol?.slice("fuyue-session.".length) || "";
+}
+function sessionToken(request: IncomingMessage, websocket = false): string {
+  return bearer(request) || cookie(request, "fuyue_session") || (websocket ? websocketBearer(request) : "");
+}
 function equalSecret(left: string, right: string): boolean {
   const leftBuffer = Buffer.from(left); const rightBuffer = Buffer.from(right);
   return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
@@ -139,7 +150,7 @@ export function createRelayServer(config: RelayConfig, fetcher: typeof fetch = f
     cors(request, response, config);
     if (!originAllowed(request, config)) { detail(response, 403, "Origin is not allowed"); return; }
     if (request.method === "OPTIONS") {
-      response.writeHead(204, { "Access-Control-Allow-Methods": "GET,POST,OPTIONS", "Access-Control-Allow-Headers": "Content-Type,Accept" }); response.end(); return;
+      response.writeHead(204, { "Access-Control-Allow-Methods": "GET,POST,OPTIONS", "Access-Control-Allow-Headers": "Content-Type,Accept,Authorization" }); response.end(); return;
     }
     const url = new URL(request.url || "/", "http://relay.local");
     try {
@@ -150,7 +161,7 @@ export function createRelayServer(config: RelayConfig, fetcher: typeof fetch = f
         if (!config.accessCode) { detail(response, 404, "这个 relay 没有启用接入码"); return; }
         const address = request.socket.remoteAddress || "unknown"; const now = Date.now(); const attempt = failedAccess.get(address);
         if (attempt && attempt.resetAt > now && attempt.count >= 5) { detail(response, 429, "接入尝试过多，请十分钟后再试"); return; }
-        const requestBody = await body(request) as { code?: unknown };
+        const requestBody = await body(request) as { code?: unknown; bearer?: unknown };
         const supplied = typeof requestBody?.code === "string" && requestBody.code.length <= 256 ? requestBody.code : "";
         if (!equalSecret(supplied, config.accessCode)) {
           failedAccess.set(address, attempt && attempt.resetAt > now ? { count: attempt.count + 1, resetAt: attempt.resetAt } : { count: 1, resetAt: now + 600_000 });
@@ -160,16 +171,16 @@ export function createRelayServer(config: RelayConfig, fetcher: typeof fetch = f
         const token = randomBytes(32).toString("base64url"); sessions.set(token, now + 30 * 86_400_000);
         const secure = ["localhost", "127.0.0.1", "::1"].includes(config.host) ? "SameSite=Lax" : "SameSite=None; Secure";
         response.setHeader("Set-Cookie", `fuyue_session=${encodeURIComponent(token)}; HttpOnly; ${secure}; Path=/v1; Max-Age=2592000`);
-        json(response, 200, { ok: true }); return;
+        json(response, 200, { ok: true, ...(requestBody.bearer === true ? { sessionToken: token } : {}) }); return;
       }
       if (request.method === "POST" && url.pathname === "/v1/session/logout") {
-        const token = cookie(request, "fuyue_session"); if (token) sessions.delete(token);
+        const token = sessionToken(request); if (token) sessions.delete(token);
         const secure = ["localhost", "127.0.0.1", "::1"].includes(config.host) ? "SameSite=Lax" : "SameSite=None; Secure";
         response.setHeader("Set-Cookie", `fuyue_session=; HttpOnly; ${secure}; Path=/v1; Max-Age=0`);
         json(response, 200, { ok: true }); return;
       }
       if (config.accessCode) {
-        const token = cookie(request, "fuyue_session"); const expiresAt = sessions.get(token) || 0;
+        const token = sessionToken(request); const expiresAt = sessions.get(token) || 0;
         if (!token || expiresAt <= Date.now()) { if (token) sessions.delete(token); detail(response, 401, "服务可能刚从休眠中恢复，请重新输入接入码连接"); return; }
       }
       if (request.method === "GET" && url.pathname === "/v1/status") {
@@ -287,7 +298,7 @@ export function createRelayServer(config: RelayConfig, fetcher: typeof fetch = f
     const url = new URL(request.url || "/", "http://relay.local");
     if (url.pathname !== "/v1/voice/live" || !originAllowed(request, config)) { socket.write("HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n"); socket.destroy(); return; }
     if (config.accessCode) {
-      const token = cookie(request, "fuyue_session"); const expiresAt = sessions.get(token) || 0;
+      const token = sessionToken(request, true); const expiresAt = sessions.get(token) || 0;
       if (!token || expiresAt <= Date.now()) { if (token) sessions.delete(token); socket.write("HTTP/1.1 401 Unauthorized\r\nConnection: close\r\n\r\n"); socket.destroy(); return; }
     }
     const doubao = config.voiceProviders.find((item) => item.id === "doubao");

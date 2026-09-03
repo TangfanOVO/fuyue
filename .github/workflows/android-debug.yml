@@ -63,18 +63,35 @@ jobs:
         run: ./gradlew assembleRelease
       - name: Verify and name signed beta APK
         if: github.repository == 'TangfanOVO/fuyue'
+        env:
+          EXPECTED_CERT_SHA256: 0e7bc05a252a456a15052769dc0d0c9cc54d013f76025c48344a8e66ce53c4a1
         run: |
-          "$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner" verify --verbose --print-certs android/app/build/outputs/apk/release/app-release.apk
+          APKSIGNER="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner"
+          "$APKSIGNER" verify --verbose --print-certs android/app/build/outputs/apk/release/app-release.apk | tee "$RUNNER_TEMP/apksigner.txt"
+          ACTUAL_CERT_SHA256="$(sed -n 's/.*certificate SHA-256 digest: //p' "$RUNNER_TEMP/apksigner.txt" | head -1 | tr '[:upper:]' '[:lower:]')"
+          test "$ACTUAL_CERT_SHA256" = "$EXPECTED_CERT_SHA256"
           cp android/app/build/outputs/apk/release/app-release.apk fuyue-beta.apk
       - name: Publish rolling APK release
         if: github.repository == 'TangfanOVO/fuyue'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          gh release view apk >/dev/null
+          gh release upload apk fuyue-beta.apk --clobber
+      - name: Read back and verify public APK
+        if: github.repository == 'TangfanOVO/fuyue'
+        env:
+          EXPECTED_CERT_SHA256: 0e7bc05a252a456a15052769dc0d0c9cc54d013f76025c48344a8e66ce53c4a1
+        run: |
+          PUBLIC_APK="$RUNNER_TEMP/fuyue-beta-public.apk"
+          curl --fail --location --retry 6 --retry-all-errors "https://github.com/TangfanOVO/fuyue/releases/download/apk/fuyue-beta.apk?run=$GITHUB_RUN_ID" --output "$PUBLIC_APK"
+          test "$(sha256sum fuyue-beta.apk | cut -d' ' -f1)" = "$(sha256sum "$PUBLIC_APK" | cut -d' ' -f1)"
+          APKSIGNER="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner"
+          "$APKSIGNER" verify --verbose --print-certs "$PUBLIC_APK" | tee "$RUNNER_TEMP/public-apksigner.txt"
+          ACTUAL_CERT_SHA256="$(sed -n 's/.*certificate SHA-256 digest: //p' "$RUNNER_TEMP/public-apksigner.txt" | head -1 | tr '[:upper:]' '[:lower:]')"
+          test "$ACTUAL_CERT_SHA256" = "$EXPECTED_CERT_SHA256"
+      - name: Move rolling APK tag after verification
+        if: github.repository == 'TangfanOVO/fuyue'
+        run: |
           git tag --force apk "$GITHUB_SHA"
           git push origin refs/tags/apk --force
-          if gh release view apk >/dev/null 2>&1; then
-            gh release upload apk fuyue-beta.apk --clobber
-          else
-            gh release create apk fuyue-beta.apk --title "赴约 Android beta（滚动更新）" --prerelease --notes "固定签名的公开 beta。以后可直接安装同一入口的新版本覆盖更新。"
-          fi

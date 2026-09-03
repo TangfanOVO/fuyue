@@ -1636,6 +1636,7 @@ export function App() {
               gatewayStatus={gatewayStatus}
               nativeAvailable={nativeAvailable}
               relayUrl={relayUrl}
+              relaySessionToken={relayClient instanceof RelayApiClient ? relayClient.sessionToken : ""}
               onBack={closePanel}
               onChange={refreshMessages}
               onDeviceChange={refreshDeviceState}
@@ -5287,7 +5288,7 @@ function ConnectionPanel({
             </label>
             <p className="field-note">
               <ShieldCheck />
-              接入码只用来换取服务端 HttpOnly 会话，不写入 LocalData
+              接入码只用来换取安全会话，不写入 LocalData
               或浏览器设置。
             </p>
             {error && (

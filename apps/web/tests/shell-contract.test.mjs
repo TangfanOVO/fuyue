@@ -243,7 +243,7 @@ test("relay settings never ask for provider API keys", () => {
   assert.match(source, /Relay URL/);
   assert.match(source, /API Key 不进入浏览器/);
   assert.match(source, /订阅接入码/);
-  assert.match(source, /HttpOnly 会话/);
+  assert.match(source, /接入码只用来换取安全会话，不写入 LocalData/);
   assert.match(source, /render\.com\/deploy\?repo=https:\/\/github\.com\/TangfanOVO\/fuyue/);
   assert.match(source, /一键部署私人 relay/);
   assert.match(source, /服务可能刚从休眠中恢复，请重新输入接入码连接/);

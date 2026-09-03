@@ -2,7 +2,7 @@
 
 公开前端不直接保存 Gemini、DeepSeek、GLM 或 OpenAI-compatible 的密钥。它只连接使用者自己控制的 relay；供应商适配、凭据、限流和审计都留在服务端。
 
-默认同源携带 Cookie（`credentials: include`）。跨域部署时，relay 必须显式允许前端 Origin、Credentials 与下列方法和请求头。远程 relay 必须使用 HTTPS；只有 `localhost`、`127.0.0.1` 和 `[::1]` 可以使用 HTTP。
+默认同源携带 Cookie（`credentials: include`）。Safari 等浏览器阻止跨站 Cookie 时，参考前端会改用接入码交换所得的 bearer 会话令牌。跨域部署时，relay 必须显式允许前端 Origin、Credentials、`Authorization` 与下列方法和请求头。远程 relay 必须使用 HTTPS；只有 `localhost`、`127.0.0.1` 和 `[::1]` 可以使用 HTTP。
 
 ## `POST /v1/session/exchange`（可选）
 
@@ -12,7 +12,7 @@
 {"code":"由服务方发放的接入码"}
 ```
 
-成功后 relay 返回 `HttpOnly`、限定路径、带过期时间的会话 Cookie。前端成功后立即清空接入码，只持久化 relay 基础地址。接入码不得进入 URL、LocalData、日志或导出包。未启用该能力的 relay 可以返回 `404`；错误接入码返回 `401`，高频尝试返回 `429`。
+成功后 relay 设置 `HttpOnly`、限定路径、带过期时间的会话 Cookie。跨站前端会在请求中附加 `"bearer":true`，此时 JSON 另返回随机 `sessionToken`。前端成功后立即清空接入码，只持久化 relay 基础地址；bearer 仅保存在当前浏览器会话中，不进入 LocalData、导出包或 URL。同源前端不请求 bearer，保留 HttpOnly 隔离；Safari 跨站 fallback 的 bearer 可被同页 JavaScript 读取，因此部署者仍应保持严格 Origin 白名单与内容安全策略。未启用该能力的 relay 可以返回 `404`；错误接入码返回 `401`，高频尝试返回 `429`。
 
 参考 relay 的单接入码与内存会话只用于个人或小范围自托管；多用户生产服务需自行实现正式身份、撤销、速率限制和共享会话存储。
 
@@ -48,7 +48,7 @@
 
 ## `POST /v1/session/logout`（可选）
 
-撤销当前 HttpOnly 会话并返回 `{"ok":true}`。服务端必须删除会话记录，同时以 `Max-Age=0` 覆盖原 Cookie。前端的“断开连接”会先请求这一接口，再清除本机保存的 relay 地址。
+撤销当前 Cookie 或 bearer 会话并返回 `{"ok":true}`。服务端必须删除会话记录，同时以 `Max-Age=0` 覆盖原 Cookie；前端也清除当前浏览器会话中的 bearer。前端的“断开连接”随后清除本机保存的 relay 地址。
 
 ## `POST /v1/chat/stream`
 
@@ -159,7 +159,7 @@ data: {"type":"done","modelLabel":"Gemini","sourceLabel":"自托管 relay","tool
 
 ### `WS /v1/voice/live`
 
-中文实时全双工使用同一 relay 的 WebSocket。浏览器先发：
+中文实时全双工使用同一 relay 的 WebSocket。跨站 Cookie 不可用时，浏览器用 `fuyue-session.<sessionToken>` WebSocket 子协议认证，避免把令牌放进 URL；连接后先发：
 
 ```json
 {"type":"start","instructions":"只负责实时语音识别与语音合成；最终回复由外部伙伴模型提供。"}

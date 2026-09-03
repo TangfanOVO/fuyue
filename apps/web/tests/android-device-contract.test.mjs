@@ -109,6 +109,7 @@ test("PWA and iOS use the relay Web Audio duplex transport while Android keeps i
   assert.match(browserLiveCall, /session\.discardAudio = true/);
   assert.match(browserLiveCall, /encoded && !session\.discardAudio/);
   assert.match(browserLiveCall, /session\.awaitingNewPlayback = true/);
+  assert.match(browserLiveCall, /fuyue-session\.\$\{sessionToken\}/);
   assert.match(voicePlugin, /elevenLabsSpeechText/);
   assert.match(voicePlugin, /startsWith\("eleven_v3"\)/);
   assert.match(browserLiveCall, /response\.cancel/);

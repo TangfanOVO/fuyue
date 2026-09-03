@@ -20,7 +20,7 @@
 - GLM、Qwen、Kimi 与 OpenRouter 配置预设
 - DeepSeek 一枚 Key 默认配置、遮蔽输入、`600` 权限配置文件、配置检查与前后端同时启动命令
 - 默认本机绑定、Origin allowlist、正文上限与显式公网防误开闸门
-- 手机订阅服务入口、一次性接入码兑换、HttpOnly 会话与失败次数限制
+- 手机订阅服务入口、一次性接入码兑换、HttpOnly Cookie / Safari bearer 会话与失败次数限制
 - 原位浮起叠卡语法，以及 PWA / relay / iOS 原生壳手机权限分层契约
 - SSE / NDJSON 流式回复、停止与错误恢复
 - 纯本地模式和连接模式共用同一份聊天账本
@@ -47,7 +47,7 @@
 - 电话已作为内置功能接入麦克风、STT、当前聊天模型、TTS、打断与原文 / 语音归档；ElevenLabs、豆包和自定义 JSON 语音契约已有 relay 与 Android 源码
 - 功能包已区分内置、魔改提示、原仓库、只拿前端、自建 / 兼容服务与完全隐藏；隐藏会真正撤掉普通入口且不写共同工作本
 - Gemini Interactions 已显式使用无状态请求；OpenAI Responses、Gemini、Anthropic Messages 与 GLM / Qwen / Kimi / OpenRouter 兼容端点均有 URL、鉴权、请求体和流式解析契约测试
-- 公开仓库、GitHub Pages PWA、Showcase 与 `0.1.0-beta.1` Android 调试包已发布
+- 公开仓库、GitHub Pages PWA、Showcase 与固定签名的滚动 Android beta 已发布
 
 ## 本次验证
 

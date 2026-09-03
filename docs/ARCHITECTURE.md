@@ -60,7 +60,7 @@
 
 - PWA：密钥留在 relay 服务端。
 - Android APK：OpenAI-compatible 直连可选使用 Android Keystore。
-- 手机托管服务：用服务地址 + 接入码换 HttpOnly 会话。
+- 手机托管服务：用服务地址 + 接入码换会话；同源走 HttpOnly Cookie，Safari 跨站时走当前浏览器会话 bearer。
 - 消费订阅：不把浏览器 Cookie 或账号 Token 交给赴约。
 
 ## 上游适配规则

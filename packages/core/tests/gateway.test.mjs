@@ -118,14 +118,21 @@ test("relay client translates browser network failures into a recoverable Chines
 });
 
 test("phone access code is exchanged without becoming part of the relay URL", async () => {
-  let captured;
-  const fetcher = async (input, init) => { captured = { input: String(input), init }; return Response.json({ ok: true }); };
-  const client = new RelayApiClient("https://relay.example.com", fetcher);
+  const captured = [];
+  const fetcher = async (input, init) => { captured.push({ input: String(input), init }); return Response.json(String(input).endsWith("/exchange") ? { ok: true, sessionToken: "a".repeat(43) } : { ok: true, service: "demo", providers: [], activeProviderId: "", capabilities: [] }); };
+  const client = new RelayApiClient("https://session-relay.example.com", fetcher);
   await client.exchangeAccessCode("one-time-access-code");
-  assert.equal(captured.input, "https://relay.example.com/v1/session/exchange");
-  assert.equal(captured.init.credentials, "include");
-  assert.equal(JSON.parse(captured.init.body).code, "one-time-access-code");
+  const resumedClient = new RelayApiClient("https://session-relay.example.com", fetcher);
+  await resumedClient.status();
+  assert.equal(captured[0].input, "https://session-relay.example.com/v1/session/exchange");
+  assert.equal(captured[0].init.credentials, "include");
+  assert.equal(JSON.parse(captured[0].init.body).code, "one-time-access-code");
+  assert.equal(JSON.parse(captured[0].init.body).bearer, true);
+  assert.equal(new Headers(captured[1].init.headers).get("Authorization"), `Bearer ${"a".repeat(43)}`);
+  assert.equal(resumedClient.sessionToken, "a".repeat(43));
   assert.doesNotMatch(client.baseUrl, /access-code/);
+  await resumedClient.revokeSession();
+  assert.equal(resumedClient.sessionToken, "");
 });
 
 test("relay client rejects malformed life and mood payloads", async () => {
