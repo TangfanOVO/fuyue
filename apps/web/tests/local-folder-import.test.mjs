@@ -21,6 +21,7 @@ test("open-source memories stay in the repository's draft-disabled path", () => 
   assert.match(memory, /setFilter\("draft"\)/);
   assert.match(memory, /先进入待审/);
   assert.match(memory, /webkitdirectory/);
+  assert.ok(memory.indexOf('className="memory-file-import"') > memory.indexOf('className="memory-system-note"'), "memory import should stay below the ordinary memory content");
 });
 
 test("open-source chat makes selected local text visible before send", () => {

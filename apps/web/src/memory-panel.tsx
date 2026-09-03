@@ -123,15 +123,6 @@ export function MemoryPanel({ repository, memories, onChange, onBack, onConfigur
       <button type="button" className="primary-button" onClick={openCreate}><Plus />新记忆</button>
     </section>
 
-    <section className="memory-file-import" aria-label="从本机文件导入记忆">
-      <span><b>从手机整理旧记忆</b><small>TXT、Markdown、JSON、CSV；先进入待审，确认后才参与召回。</small></span>
-      <div>
-        <label><FileText /><span>多选文件</span><input disabled={importing} type="file" multiple accept=".txt,.md,.markdown,.json,.csv" onChange={(event) => { const input = event.currentTarget; void importFiles(Array.from(input.files || [])); input.value = ""; }} /></label>
-        <label><FolderOpen /><span>{importing ? "读取中…" : "读文件夹"}</span><input disabled={importing} type="file" multiple accept=".txt,.md,.markdown,.json,.csv" {...{ webkitdirectory: "" }} onChange={(event) => { const input = event.currentTarget; void importFiles(Array.from(input.files || [])); input.value = ""; }} /></label>
-      </div>
-    </section>
-    {importNotice && <p className="memory-import-notice" role="status">{importNotice}</p>}
-
     {pendingCount > 0 && <button type="button" className="memory-review-banner" onClick={() => setFilter("draft")}><Brain /><span><b>{pendingCount} 条记忆等你审阅</b><small>未启用的内容不会交给模型</small></span><strong>去看看</strong></button>}
 
     {error && <p className="form-error" role="alert">{error}</p>}
@@ -154,6 +145,15 @@ export function MemoryPanel({ repository, memories, onChange, onBack, onConfigur
     </article>)}</section> : <section className="memory-library-empty"><Brain /><h2>{memories.length ? "没有符合条件的记忆" : "记忆库还是空的"}</h2><p>{memories.length ? "换一个关键词或层级。" : "新记忆先作为待审内容留下，不会偷跑进模型。"}</p><button type="button" className="secondary-button" onClick={() => { if (memories.length) { setQuery(""); setFilter("all"); } else setAdding(true); }}>{memories.length ? "查看全部" : "写第一条"}</button></section>}
 
     <details className="memory-system-note"><summary>这套记忆怎样工作</summary><div><p>L1 / L2 / L3 是可审阅层级。当前公开版不会自动蒸馏、升格、降权或遗忘；只有你明确启用的记忆才参与召回。</p><button type="button" className="text-button" onClick={onConfigure}>查看记忆功能包</button></div></details>
+
+    <section className="memory-file-import" aria-label="从本机文件导入记忆">
+      <span><b>从手机整理旧记忆</b><small>TXT、Markdown、JSON、CSV；先进入待审，确认后才参与召回。</small></span>
+      <div>
+        <label><FileText /><span>多选文件</span><input disabled={importing} type="file" multiple accept=".txt,.md,.markdown,.json,.csv" onChange={(event) => { const input = event.currentTarget; void importFiles(Array.from(input.files || [])); input.value = ""; }} /></label>
+        <label><FolderOpen /><span>{importing ? "读取中…" : "读文件夹"}</span><input disabled={importing} type="file" multiple accept=".txt,.md,.markdown,.json,.csv" {...{ webkitdirectory: "" }} onChange={(event) => { const input = event.currentTarget; void importFiles(Array.from(input.files || [])); input.value = ""; }} /></label>
+      </div>
+    </section>
+    {importNotice && <p className="memory-import-notice" role="status">{importNotice}</p>}
 
     {adding && <button type="button" className="memory-editor-scrim" onClick={closeEditor} aria-label="关闭记忆编辑" />}
     <section className={`memory-editor-sheet ${adding ? "is-open" : ""}`} aria-hidden={!adding}><header><div><h2>{editingId ? "整理这条记忆" : "写一条记忆"}</h2><p>{editingId ? "修改后保留原来的召回状态和证据索引。" : "新记忆先作为待审内容，不会偷跑进模型。"}</p></div><button type="button" className="icon-button quiet" onClick={closeEditor} aria-label="关闭记忆编辑"><X /></button></header><form className="editor-form memory-create-form" onSubmit={create}>

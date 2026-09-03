@@ -250,7 +250,7 @@ body:has(.feature-drawer) { overflow: hidden; }
 .memory-library-overview b { font-family: Georgia, serif; font-size: 1.45rem; font-weight: 500; line-height: 1; }
 .memory-library-overview small { color: var(--ink-soft); font-size: .64rem; white-space: nowrap; }
 .memory-library-overview .primary-button { align-self: center; margin-left: 12px; white-space: nowrap; }
-.memory-file-import { margin: 0 0 16px; padding: 13px 14px; display: flex; align-items: center; justify-content: space-between; gap: 13px; border: 1px solid var(--line); border-radius: 18px 12px 18px 12px; background: var(--paper-raised); }
+.memory-file-import { margin: 16px 0 0; padding: 13px 14px; display: flex; align-items: center; justify-content: space-between; gap: 13px; border: 1px solid var(--line); border-radius: 18px 12px 18px 12px; background: var(--paper-raised); }
 .memory-file-import > span { min-width: 0; display: grid; gap: 4px; }
 .memory-file-import b { color: var(--ink); font-size: .8rem; }
 .memory-file-import small { color: var(--ink-soft); font-size: .68rem; line-height: 1.5; }

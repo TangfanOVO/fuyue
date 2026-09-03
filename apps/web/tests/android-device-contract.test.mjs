@@ -30,6 +30,17 @@ test("Android resizes the chat viewport above the software keyboard", () => {
   assert.match(manifest, /android:windowSoftInputMode="adjustResize"/);
 });
 
+test("Android LocalData export uses the system save picker and only reports success after writing", () => {
+  assert.match(activity, /registerPlugin\(FuyueDevicePlugin\.class\)/);
+  assert.match(plugin, /Intent\.ACTION_CREATE_DOCUMENT/);
+  assert.match(plugin, /startActivityForResult\(call, intent, "saveJsonDocumentResult"\)/);
+  assert.match(plugin, /openOutputStream\(target, "w"\)/);
+  assert.match(plugin, /output\.write\(content\.getBytes\(StandardCharsets\.UTF_8\)\)/);
+  assert.match(plugin, /put\("saved", true\)/);
+  assert.match(app, /if \(hasAndroidDeviceBridge\(\)\)/);
+  assert.match(app, /已取消保存，没有写入文件/);
+});
+
 test("calendar permission is requested only from its explicit feature screen", () => {
   assert.match(app, /requestNativeCalendarAccess\(mode\)/);
   assert.match(app, /只在这里点授权时请求/);
