@@ -38,8 +38,12 @@ test("public Android beta uses one stable signing contract and rolling download 
   assert.match(workflow, /FUYUE_ANDROID_KEYSTORE_BASE64/);
   assert.match(workflow, /gh release upload apk fuyue-beta\.apk --clobber/);
   assert.match(workflow, /EXPECTED_CERT_SHA256/);
-  assert.match(workflow, /Read back and verify public APK/);
-  assert.ok(workflow.indexOf("Read back and verify public APK") < workflow.indexOf("Move rolling APK tag after verification"));
+  assert.match(workflow, /Publish and verify versioned APK candidate/);
+  assert.match(workflow, /gh release download apk --pattern fuyue-beta\.apk/);
+  assert.match(workflow, /restore_previous/);
+  assert.match(workflow, /Read back and verify stable APK/);
+  assert.ok(workflow.indexOf("Publish and verify versioned APK candidate") < workflow.indexOf("gh release upload apk fuyue-beta.apk --clobber"));
+  assert.ok(workflow.indexOf("Read back and verify stable APK") < workflow.indexOf("Move rolling APK tag after verification"));
   assert.match(readme, /releases\/download\/apk\/fuyue-beta\.apk/);
 });
 

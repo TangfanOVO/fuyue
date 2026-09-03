@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import type { AddressInfo } from "node:net";
+import { isIP, type AddressInfo } from "node:net";
 import { WebSocketServer } from "ws";
 import { BUILTIN_CAPABILITIES, CLIENT_TOOL_NAMES, isClientToolName, localCapabilityStatus, type CapabilityStatus, type ChatGatewayRequest, type ClientToolAction, type LifeOverviewItem, type MoodSnapshot, type VoiceAudioInput, type VoiceProviderId } from "@fuyue/core";
 import type { ProviderKind, RelayConfig } from "./config.js";
@@ -13,6 +13,9 @@ import { engawaAction, engawaStatus } from "./engawa.js";
 
 const MAX_BODY = 1_000_000;
 const MAX_INPUT = 40_000;
+const ACCESS_WINDOW_MS = 600_000;
+const MAX_ACCESS_FAILURES_PER_CLIENT = 5;
+const MAX_ACCESS_FAILURES_GLOBAL = 100;
 
 function json(response: ServerResponse, status: number, body: unknown) {
   response.writeHead(status, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
@@ -112,12 +115,20 @@ function equalSecret(left: string, right: string): boolean {
   const leftBuffer = Buffer.from(left); const rightBuffer = Buffer.from(right);
   return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
 }
+function clientAddress(request: IncomingMessage, config: RelayConfig): string {
+  if (config.trustedProxy) {
+    const forwarded = String(request.headers["x-forwarded-for"] || "").split(",")[0]?.trim() || "";
+    if (isIP(forwarded)) return forwarded;
+  }
+  return request.socket.remoteAddress || "unknown";
+}
 
 export function createRelayServer(config: RelayConfig, fetcher: typeof fetch = fetch) {
   const completed = new Map<string, { content: string; modelLabel: string; clientActions: ClientToolAction[] }>();
   const inflight = new Set<string>();
   const sessions = new Map<string, number>();
   const failedAccess = new Map<string, { count: number; resetAt: number }>();
+  let globalFailedAccess = { count: 0, resetAt: 0 };
   const providers = new Map(config.providers.map((item) => [item.id, { config: item, adapter: createProvider(item, fetcher) }]));
   const capabilityStatus = (engawaReady = false): CapabilityStatus[] => {
     const localStatuses = new Map(localCapabilityStatus().map((item) => [item.id, item]));
@@ -159,12 +170,17 @@ export function createRelayServer(config: RelayConfig, fetcher: typeof fetch = f
       }
       if (request.method === "POST" && url.pathname === "/v1/session/exchange") {
         if (!config.accessCode) { detail(response, 404, "这个 relay 没有启用接入码"); return; }
-        const address = request.socket.remoteAddress || "unknown"; const now = Date.now(); const attempt = failedAccess.get(address);
-        if (attempt && attempt.resetAt > now && attempt.count >= 5) { detail(response, 429, "接入尝试过多，请十分钟后再试"); return; }
+        const now = Date.now();
+        for (const [address, attempt] of failedAccess) if (attempt.resetAt <= now) failedAccess.delete(address);
+        if (globalFailedAccess.resetAt <= now) globalFailedAccess = { count: 0, resetAt: now + ACCESS_WINDOW_MS };
+        if (globalFailedAccess.count >= MAX_ACCESS_FAILURES_GLOBAL) { detail(response, 429, "服务的接入尝试暂时过多，请十分钟后再试"); return; }
+        const address = clientAddress(request, config); const attempt = failedAccess.get(address);
+        if (attempt && attempt.count >= MAX_ACCESS_FAILURES_PER_CLIENT) { detail(response, 429, "这台设备的接入尝试过多，请十分钟后再试"); return; }
         const requestBody = await body(request) as { code?: unknown; bearer?: unknown };
         const supplied = typeof requestBody?.code === "string" && requestBody.code.length <= 256 ? requestBody.code : "";
         if (!equalSecret(supplied, config.accessCode)) {
-          failedAccess.set(address, attempt && attempt.resetAt > now ? { count: attempt.count + 1, resetAt: attempt.resetAt } : { count: 1, resetAt: now + 600_000 });
+          failedAccess.set(address, attempt ? { count: attempt.count + 1, resetAt: attempt.resetAt } : { count: 1, resetAt: now + ACCESS_WINDOW_MS });
+          globalFailedAccess.count += 1;
           detail(response, 401, "服务地址或接入码不正确"); return;
         }
         failedAccess.delete(address);

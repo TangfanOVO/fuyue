@@ -26,6 +26,7 @@ export interface VoiceProviderConfig {
 export interface RelayConfig {
   host: string;
   port: number;
+  trustedProxy: boolean;
   serviceName: string;
   allowedOrigins: Set<string>;
   providers: ProviderConfig[];
@@ -49,7 +50,8 @@ function cleanUrl(value: string, fallback: string): string {
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): RelayConfig {
   const host = env.FUYUE_RELAY_HOST?.trim() || "127.0.0.1";
   const loopback = ["localhost", "127.0.0.1", "::1"].includes(host);
-  if (!loopback && env.FUYUE_TRUSTED_PROXY !== "1") {
+  const trustedProxy = env.FUYUE_TRUSTED_PROXY === "1";
+  if (!loopback && !trustedProxy) {
     throw new Error("Refusing a public bind without FUYUE_TRUSTED_PROXY=1 and an authenticated HTTPS proxy");
   }
   const port = Number.parseInt(env.FUYUE_RELAY_PORT || "8787", 10);
@@ -152,7 +154,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): RelayConfig {
   const activeVoice = requestedVoice ? voiceProviders.find((item) => item.id === requestedVoice) : voiceProviders[0];
   if (requestedVoice && voiceProviders.length > 0 && !activeVoice) throw new Error(`Active voice provider ${requestedVoice} is not fully configured`);
   return {
-    host, port,
+    host, port, trustedProxy,
     serviceName: env.FUYUE_RELAY_NAME?.trim() || "fuyue-self-hosted-relay",
     allowedOrigins, providers,
     activeProviderId: active?.id || "",

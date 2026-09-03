@@ -471,3 +471,23 @@ test("phone access code supports both HttpOnly cookie and Safari bearer sessions
   assert.equal((await fetch(`${baseUrl}/v1/status`, { headers: { cookie: sessionCookie.split(";")[0] } })).status, 401);
   assert.equal((await fetch(`${baseUrl}/v1/status`, { headers: { authorization: `Bearer ${session.sessionToken}` } })).status, 401);
 });
+
+test("trusted proxy rate limiting separates clients and keeps a global ceiling", async (context) => {
+  const config = loadConfig({ FUYUE_RELAY_PORT: "8787", FUYUE_ACCESS_CODE: "phone-access-code-1234", FUYUE_TRUSTED_PROXY: "1" });
+  assert.equal(config.trustedProxy, true);
+  config.port = 0;
+  const relay = createRelayServer(config);
+  const address = await relay.listen();
+  context.after(() => new Promise((resolve) => relay.server.close(resolve)));
+  const url = `http://127.0.0.1:${address.port}/v1/session/exchange`;
+  const exchange = (code, ip) => fetch(url, {
+    method: "POST",
+    headers: { "content-type": "application/json", origin: "http://127.0.0.1:4173", "x-forwarded-for": `${ip}, 10.0.0.1` },
+    body: JSON.stringify({ code }),
+  });
+  for (let attempt = 0; attempt < 5; attempt += 1) assert.equal((await exchange("wrong", "203.0.113.10")).status, 401);
+  assert.equal((await exchange("phone-access-code-1234", "203.0.113.10")).status, 429);
+  assert.equal((await exchange("phone-access-code-1234", "203.0.113.11")).status, 200);
+  for (let attempt = 5; attempt < 100; attempt += 1) assert.equal((await exchange("wrong", `198.51.100.${attempt + 1}`)).status, 401);
+  assert.equal((await exchange("phone-access-code-1234", "192.0.2.1")).status, 429);
+});

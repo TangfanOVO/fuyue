@@ -37,7 +37,7 @@ npm run dev:relay
 FUYUE_ACCESS_CODE=至少十六个字符的随机接入码
 ```
 
-参考实现使用单一接入码、进程内会话和十分钟失败限流，适合个人、小家庭或局域网。面向公众收费时，应把 `/v1/session/exchange` 接到正式的登录、支付、撤销和共享 Session 存储；前端契约无需改变。
+参考实现使用单一接入码、进程内会话和十分钟失败限流，适合个人、小家庭或局域网。限流在受信任代理后按 `X-Forwarded-For` 的第一个真实来源地址分开计数，并保留全局失败上限；[Render 官方也要求公网 Web Service 从该请求头读取真实客户端 IP](https://render.com/articles/how-render-handles-ddos-attacks)。面向公众收费时，应把 `/v1/session/exchange` 接到正式的登录、支付、撤销和共享 Session 存储；前端契约无需改变。
 
 ### DeepSeek
 
@@ -138,7 +138,7 @@ iPhone / iPad 的 LocalData 位于安装 PWA 所使用的网站 Origin 对应的
 4. 密钥只进入服务端 Secret / 环境变量，不进入镜像、仓库、浏览器或日志。
 5. 完成以上配置后，才设置 `FUYUE_RELAY_HOST=0.0.0.0` 与 `FUYUE_TRUSTED_PROXY=1`。
 
-`FUYUE_TRUSTED_PROXY=1` 只是显式安全确认，不会替你实现鉴权。没有真实鉴权代理时不要把端口暴露到公网。
+`FUYUE_TRUSTED_PROXY=1` 会信任代理提供的 `X-Forwarded-For` 来源地址，同时也是显式安全确认；它不会替你实现鉴权。只有当入站请求必然经过 Render 或你控制的 HTTPS 代理时才能开启，不要在可被客户端绕过代理直连的端口上开启。
 
 ## Web / PWA
 

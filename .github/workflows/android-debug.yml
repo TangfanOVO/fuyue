@@ -71,27 +71,65 @@ jobs:
           ACTUAL_CERT_SHA256="$(sed -n 's/.*certificate SHA-256 digest: //p' "$RUNNER_TEMP/apksigner.txt" | head -1 | tr '[:upper:]' '[:lower:]')"
           test "$ACTUAL_CERT_SHA256" = "$EXPECTED_CERT_SHA256"
           cp android/app/build/outputs/apk/release/app-release.apk fuyue-beta.apk
-      - name: Publish rolling APK release
+      - name: Publish and verify versioned APK candidate
         if: github.repository == 'TangfanOVO/fuyue'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release view apk >/dev/null
-          gh release upload apk fuyue-beta.apk --clobber
-      - name: Read back and verify public APK
-        if: github.repository == 'TangfanOVO/fuyue'
-        env:
           EXPECTED_CERT_SHA256: 0e7bc05a252a456a15052769dc0d0c9cc54d013f76025c48344a8e66ce53c4a1
         run: |
-          PUBLIC_APK="$RUNNER_TEMP/fuyue-beta-public.apk"
-          curl --fail --location --retry 6 --retry-all-errors "https://github.com/TangfanOVO/fuyue/releases/download/apk/fuyue-beta.apk?run=$GITHUB_RUN_ID" --output "$PUBLIC_APK"
-          test "$(sha256sum fuyue-beta.apk | cut -d' ' -f1)" = "$(sha256sum "$PUBLIC_APK" | cut -d' ' -f1)"
+          gh release view apk >/dev/null
+          CANDIDATE_ASSET="fuyue-beta-${FUYUE_VERSION_NAME}.apk"
+          cp fuyue-beta.apk "$CANDIDATE_ASSET"
+          gh release upload apk "$CANDIDATE_ASSET" --clobber
+          PUBLIC_APK="$RUNNER_TEMP/fuyue-beta-candidate.apk"
+          curl --fail --location --retry 6 --retry-all-errors "https://github.com/TangfanOVO/fuyue/releases/download/apk/$CANDIDATE_ASSET?run=$GITHUB_RUN_ID" --output "$PUBLIC_APK"
+          test "$(sha256sum "$CANDIDATE_ASSET" | cut -d' ' -f1)" = "$(sha256sum "$PUBLIC_APK" | cut -d' ' -f1)"
           APKSIGNER="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner"
           "$APKSIGNER" verify --verbose --print-certs "$PUBLIC_APK" | tee "$RUNNER_TEMP/public-apksigner.txt"
           ACTUAL_CERT_SHA256="$(sed -n 's/.*certificate SHA-256 digest: //p' "$RUNNER_TEMP/public-apksigner.txt" | head -1 | tr '[:upper:]' '[:lower:]')"
           test "$ACTUAL_CERT_SHA256" = "$EXPECTED_CERT_SHA256"
-      - name: Move rolling APK tag after verification
+          echo "CANDIDATE_ASSET=$CANDIDATE_ASSET" >> "$GITHUB_ENV"
+      - name: Promote verified APK with automatic rollback
         if: github.repository == 'TangfanOVO/fuyue'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_CERT_SHA256: 0e7bc05a252a456a15052769dc0d0c9cc54d013f76025c48344a8e66ce53c4a1
         run: |
+          PREVIOUS_DIR="$RUNNER_TEMP/previous-apk"
+          mkdir -p "$PREVIOUS_DIR"
+          gh release download apk --pattern fuyue-beta.apk --dir "$PREVIOUS_DIR"
+          restore_previous() {
+            status=$?
+            trap - ERR
+            set +e
+            echo "::warning::Stable APK promotion failed; restoring the previous verified asset"
+            gh release upload apk "$PREVIOUS_DIR/fuyue-beta.apk" --clobber
+            restored=$?
+            if [ "$restored" -eq 0 ]; then
+              RESTORED_APK="$RUNNER_TEMP/fuyue-beta-restored.apk"
+              curl --fail --location --retry 6 --retry-all-errors "https://github.com/TangfanOVO/fuyue/releases/download/apk/fuyue-beta.apk?rollback=$GITHUB_RUN_ID" --output "$RESTORED_APK"
+              test "$(sha256sum "$PREVIOUS_DIR/fuyue-beta.apk" | cut -d' ' -f1)" = "$(sha256sum "$RESTORED_APK" | cut -d' ' -f1)"
+              restored=$?
+            fi
+            gh release delete-asset apk "$CANDIDATE_ASSET" --yes >/dev/null 2>&1
+            if [ "$restored" -ne 0 ]; then
+              echo "::error::Automatic APK rollback also failed"
+              exit 1
+            fi
+            exit "$status"
+          }
+          trap restore_previous ERR
+          gh release upload apk fuyue-beta.apk --clobber
+          PUBLIC_APK="$RUNNER_TEMP/fuyue-beta-public.apk"
+          echo "Read back and verify stable APK"
+          curl --fail --location --retry 6 --retry-all-errors "https://github.com/TangfanOVO/fuyue/releases/download/apk/fuyue-beta.apk?run=$GITHUB_RUN_ID" --output "$PUBLIC_APK"
+          test "$(sha256sum fuyue-beta.apk | cut -d' ' -f1)" = "$(sha256sum "$PUBLIC_APK" | cut -d' ' -f1)"
+          APKSIGNER="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner"
+          "$APKSIGNER" verify --verbose --print-certs "$PUBLIC_APK" | tee "$RUNNER_TEMP/stable-apksigner.txt"
+          ACTUAL_CERT_SHA256="$(sed -n 's/.*certificate SHA-256 digest: //p' "$RUNNER_TEMP/stable-apksigner.txt" | head -1 | tr '[:upper:]' '[:lower:]')"
+          test "$ACTUAL_CERT_SHA256" = "$EXPECTED_CERT_SHA256"
+          echo "Move rolling APK tag after verification"
           git tag --force apk "$GITHUB_SHA"
           git push origin refs/tags/apk --force
+          trap - ERR
+          gh release delete-asset apk "$CANDIDATE_ASSET" --yes || echo "::warning::Verified staging asset could not be removed"
