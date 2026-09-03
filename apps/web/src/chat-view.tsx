@@ -1,5 +1,5 @@
 import {
-  ArrowClockwise, BookOpen, Brain, Camera, Copy, Headphones, Heart, Image as ImageIcon,
+  ArrowClockwise, BookOpen, Brain, Camera, Copy, FileText, FolderOpen, Headphones, Heart, Image as ImageIcon,
   Link, MagnifyingGlass, PaperPlaneTilt, PhoneCall, Plus, ShareNetwork, Sparkle, SpinnerGap, Star, UserCircle,
   SpeakerHigh, WarningCircle, X,
 } from "@phosphor-icons/react";
@@ -22,6 +22,7 @@ import {
   type RoomEntry,
 } from "@fuyue/core";
 import { ENABLED_CLIENT_TOOLS, executeClientActions } from "./client-tools";
+import { readLocalTextFiles } from "./local-file-import";
 import { ProfileAvatar } from "./profile-avatar";
 
 const KaomojiSheet = lazy(() => import("./kaomoji-sheet"));
@@ -128,6 +129,8 @@ export function ChatView({ repository, conversation, messages, people, memories,
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const folderInputRef = useRef<HTMLInputElement | null>(null);
   const messageListRef = useRef<HTMLElement | null>(null);
   const user = useMemo(() => people.find((item) => item.id === "user") || fallbackProfile("user", "我"), [people]);
   const companion = useMemo(() => people.find((item) => item.id === "companion") || fallbackProfile("companion", companionName || "伙伴"), [companionName, people]);
@@ -264,6 +267,26 @@ export function ChatView({ repository, conversation, messages, people, memories,
     finally { setAttachmentBusy(false); }
   }
 
+  async function readFilesIntoComposer(files: File[]) {
+    if (!files.length || attachmentBusy) return;
+    setAttachmentBusy(true); setNotice("正在读取本机文件…");
+    try {
+      const batch = await readLocalTextFiles(files);
+      let next = content; let imported = 0; let skipped = batch.skipped;
+      for (const item of batch.items) {
+        const block = `【本机文件：${item.title}】\n${item.content}`;
+        const joined = `${next}${next ? "\n\n" : ""}${block}`;
+        if (joined.length > 20_000) { skipped += 1; continue; }
+        next = joined; imported += 1;
+      }
+      if (imported) { setContent(next); consumePlus(); window.requestAnimationFrame(() => composerRef.current?.focus()); }
+      setNotice(imported
+        ? `已把 ${imported} 个文件读进输入框，发送前可以继续检查${skipped ? `；${skipped} 个文件已跳过` : ""}`
+        : `没有可放进输入框的内容${skipped ? `；${skipped} 个文件为空、过大或格式不支持` : ""}`);
+    } catch { setNotice("这些本机文件刚才没有读完，请重新选择。"); }
+    finally { setAttachmentBusy(false); }
+  }
+
   async function toggleStar(message: Message) {
     const next = !message.isStarred;
     const paired = message.parentMessageId ? messages.find((item) => item.id === message.parentMessageId) : null;
@@ -318,6 +341,8 @@ export function ChatView({ repository, conversation, messages, people, memories,
       {plusOpen && <div className="plus-menu" id="chat-plus-menu" aria-label="聊天附加功能">
         <button onClick={() => imageInputRef.current?.click()}><span><ImageIcon /></span><b>多选图片</b></button>
         <button onClick={() => cameraInputRef.current?.click()}><span><Camera /></span><b>相机</b></button>
+        <button onClick={() => fileInputRef.current?.click()}><span><FileText /></span><b>多选文件</b></button>
+        <button onClick={() => folderInputRef.current?.click()}><span><FolderOpen /></span><b>文件夹</b></button>
         <button onClick={() => { consumePlus(); setContent((current) => `${current}${current ? "\n\n" : ""}请联网搜索（需要 relay 声明搜索能力）：`); }}><span><MagnifyingGlass /></span><b>写搜索请求</b></button>
         <button onClick={() => { consumePlus(); setKaomojiOpen(true); }}><span className="kaomoji-icon">(´･ω･`)</span><b>颜文字</b></button>
         <button onClick={() => { consumePlus(); setVoiceOpen(true); }}><span><SpeakerHigh /></span><b>声音</b></button>
@@ -335,6 +360,8 @@ export function ChatView({ repository, conversation, messages, people, memories,
       </form>
       <input ref={imageInputRef} hidden type="file" multiple accept="image/*" onChange={(event) => { const files = Array.from(event.currentTarget.files || []).slice(0, 4); event.currentTarget.value = ""; void Promise.all(files.map((file) => pickImage(file))); }} />
       <input ref={cameraInputRef} hidden type="file" accept="image/*" capture="environment" onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ""; void pickImage(file); }} />
+      <input ref={fileInputRef} hidden type="file" multiple accept=".txt,.md,.markdown,.json,.csv" onChange={(event) => { const input = event.currentTarget; void readFilesIntoComposer(Array.from(input.files || [])); input.value = ""; }} />
+      <input ref={folderInputRef} hidden type="file" multiple accept=".txt,.md,.markdown,.json,.csv" {...{ webkitdirectory: "" }} onChange={(event) => { const input = event.currentTarget; void readFilesIntoComposer(Array.from(input.files || [])); input.value = ""; }} />
     </footer>
   </div>;
 }

@@ -1,7 +1,8 @@
-import { ArrowLeft, Brain, Check, FloppyDisk, MagnifyingGlass, PencilSimple, Plus, SpinnerGap, Trash, X } from "@phosphor-icons/react";
+import { ArrowLeft, Brain, Check, FileText, FloppyDisk, FolderOpen, MagnifyingGlass, PencilSimple, Plus, SpinnerGap, Trash, X } from "@phosphor-icons/react";
 import { useMemo, useState, type FormEvent } from "react";
 import type { LocalDataRepository, MemoryItem, MemoryLayer } from "@fuyue/core";
 import { MemoryMap } from "@fuyue/ui/memory";
+import { readLocalTextFiles } from "./local-file-import";
 
 type MemoryFilter = "all" | MemoryLayer | "draft";
 
@@ -41,6 +42,8 @@ export function MemoryPanel({ repository, memories, onChange, onBack, onConfigur
   const [busyId, setBusyId] = useState("");
   const [selectedMemoryId, setSelectedMemoryId] = useState("");
   const [error, setError] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [importNotice, setImportNotice] = useState("");
   const enabledCount = memories.filter((item) => item.injectionEnabled).length;
   const pendingCount = memories.filter((item) => !item.injectionEnabled || item.status !== "active").length;
   const layerCounts = { working: memories.filter((item) => item.layer === "working").length, semantic: memories.filter((item) => item.layer === "semantic").length, core: memories.filter((item) => item.layer === "core").length };
@@ -91,6 +94,25 @@ export function MemoryPanel({ repository, memories, onChange, onBack, onConfigur
     finally { setBusyId(""); }
   }
 
+  async function importFiles(files: File[]) {
+    if (!files.length || importing) return;
+    setImporting(true); setError(""); setImportNotice("正在读取本机文件…");
+    try {
+      const batch = await readLocalTextFiles(files);
+      const pending = batch.items.filter((candidate) => !memories.some((item) => item.title === candidate.title && item.content === candidate.content));
+      let imported = 0; let failed = batch.skipped + batch.items.length - pending.length;
+      for (const candidate of pending) {
+        try { await repository.createMemory({ ...candidate, layer: "working" }); imported += 1; }
+        catch { failed += 1; }
+      }
+      if (imported) { await onChange(); setFilter("draft"); }
+      setImportNotice(imported
+        ? `已读入 ${imported} 条待审记忆，默认不参与召回${failed ? `；${failed} 个文件已跳过` : ""}`
+        : `没有读入内容${failed ? `；${failed} 个文件为空、过大、重复或格式不支持` : ""}`);
+    } catch { setError("这些本机文件刚才没有读完，请重新选择。"); setImportNotice(""); }
+    finally { setImporting(false); }
+  }
+
   return <div className="panel-content memory-library-panel">
     <header className="panel-header"><button data-panel-back className="icon-button quiet" onClick={onBack} aria-label="返回"><ArrowLeft /></button><div><h1 id="panel-title">记忆库</h1><p>审批、来源、禁用与检索</p></div></header>
 
@@ -100,6 +122,15 @@ export function MemoryPanel({ repository, memories, onChange, onBack, onConfigur
       <span><b>{pendingCount}</b><small>等待审阅</small></span>
       <button type="button" className="primary-button" onClick={openCreate}><Plus />新记忆</button>
     </section>
+
+    <section className="memory-file-import" aria-label="从本机文件导入记忆">
+      <span><b>从手机整理旧记忆</b><small>TXT、Markdown、JSON、CSV；先进入待审，确认后才参与召回。</small></span>
+      <div>
+        <label><FileText /><span>多选文件</span><input disabled={importing} type="file" multiple accept=".txt,.md,.markdown,.json,.csv" onChange={(event) => { const input = event.currentTarget; void importFiles(Array.from(input.files || [])); input.value = ""; }} /></label>
+        <label><FolderOpen /><span>{importing ? "读取中…" : "读文件夹"}</span><input disabled={importing} type="file" multiple accept=".txt,.md,.markdown,.json,.csv" {...{ webkitdirectory: "" }} onChange={(event) => { const input = event.currentTarget; void importFiles(Array.from(input.files || [])); input.value = ""; }} /></label>
+      </div>
+    </section>
+    {importNotice && <p className="memory-import-notice" role="status">{importNotice}</p>}
 
     {pendingCount > 0 && <button type="button" className="memory-review-banner" onClick={() => setFilter("draft")}><Brain /><span><b>{pendingCount} 条记忆等你审阅</b><small>未启用的内容不会交给模型</small></span><strong>去看看</strong></button>}
 
