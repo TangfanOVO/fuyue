@@ -170,7 +170,7 @@ export function createRelayServer(config: RelayConfig, fetcher: typeof fetch = f
       }
       if (config.accessCode) {
         const token = cookie(request, "fuyue_session"); const expiresAt = sessions.get(token) || 0;
-        if (!token || expiresAt <= Date.now()) { if (token) sessions.delete(token); detail(response, 401, "请先使用订阅接入码连接"); return; }
+        if (!token || expiresAt <= Date.now()) { if (token) sessions.delete(token); detail(response, 401, "服务可能刚从休眠中恢复，请重新输入接入码连接"); return; }
       }
       if (request.method === "GET" && url.pathname === "/v1/status") {
         const engawa = await engawaStatus(config.engawaUrl, fetcher);

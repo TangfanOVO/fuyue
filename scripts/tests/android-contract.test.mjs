@@ -12,6 +12,9 @@ const webClientTools = await readFile(new URL("../../apps/web/src/client-tools.t
 const relayServer = await readFile(new URL("../../apps/relay/src/server.ts", import.meta.url), "utf8");
 const relayContract = await readFile(new URL("../../docs/RELAY_API_CONTRACT.md", import.meta.url), "utf8");
 const config = await readFile(new URL("../../capacitor.config.ts", import.meta.url), "utf8");
+const gradle = await readFile(new URL("../../android/app/build.gradle", import.meta.url), "utf8");
+const workflow = await readFile(new URL("../../.github/workflows/android-debug.yml", import.meta.url), "utf8");
+const readme = await readFile(new URL("../../README.md", import.meta.url), "utf8");
 
 test("Android shell keeps network and backup boundaries explicit", () => {
   assert.match(manifest, /android:allowBackup="false"/);
@@ -25,6 +28,16 @@ test("Android shell keeps network and backup boundaries explicit", () => {
   assert.match(activity, /clearCache\(true\)/);
   assert.match(activity, /registration=>registration\.unregister\(\)/);
   assert.match(activity, /key\.startsWith\('fuyue-shell-'\)/);
+});
+
+test("public Android beta uses one stable signing contract and rolling download URL", () => {
+  assert.match(gradle, /FUYUE_ANDROID_KEYSTORE_FILE/);
+  assert.match(gradle, /FUYUE_VERSION_CODE/);
+  assert.match(gradle, /requireReleaseSigning/);
+  assert.match(workflow, /assembleRelease/);
+  assert.match(workflow, /FUYUE_ANDROID_KEYSTORE_BASE64/);
+  assert.match(workflow, /gh release upload apk fuyue-beta\.apk --clobber/);
+  assert.match(readme, /releases\/download\/apk\/fuyue-beta\.apk/);
 });
 
 test("Android registers a native provider-key gateway", () => {

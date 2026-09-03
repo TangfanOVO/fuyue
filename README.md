@@ -5,7 +5,7 @@
 
 > 当前是 `0.1.0-beta.1` 公开候选。LocalData、界面、DeepSeek 主路径和自动测试可用；其余付费供应商尚未全部用真 Key 验收，因此不标成稳定版。持续修复中，但不保证完全实时debug。卡手可以自己随意二改。
 
-[在线打开赴约](https://tangfanovo.github.io/fuyue/) · [看外观与前端积木](https://tangfanovo.github.io/fuyue/showcase/) · [下载 Android 测试包](https://github.com/TangfanOVO/fuyue/releases) · [查看源码](https://github.com/TangfanOVO/fuyue)
+[在线打开赴约](https://tangfanovo.github.io/fuyue/) · [看外观与前端积木](https://tangfanovo.github.io/fuyue/showcase/) · [下载 Android beta](https://github.com/TangfanOVO/fuyue/releases/download/apk/fuyue-beta.apk) · [查看源码](https://github.com/TangfanOVO/fuyue)
 
 ## 先选一条路
 
@@ -14,7 +14,7 @@
 | 先看看长什么样 | 打开[在线预览](https://tangfanovo.github.io/fuyue/) | 当前浏览器的 LocalData | 页面自动更新 |
 | iPhone / iPad 使用 | Safari 打开预览，分享 → 添加到主屏幕 | 当前设备的浏览器 LocalData | PWA 自动更新 |
 | Android 普通使用 | Chrome 打开预览，菜单 → 安装应用 | 当前设备的浏览器 LocalData | PWA 自动更新 |
-| Android 原生直连 | 从 [Releases](https://github.com/TangfanOVO/fuyue/releases) 安装 APK | 应用 LocalData；API Key 在 Android Keystore | 安装同签名新版本 |
+| Android 原生直连 | 安装[固定签名的滚动 beta](https://github.com/TangfanOVO/fuyue/releases/download/apk/fuyue-beta.apk) | 应用 LocalData；API Key 在 Android Keystore | 从同一入口覆盖安装新版 |
 | 有自己的电脑或云 | 下载源码运行 `npm run setup && npm run dev:all`，或把 relay 部署到自己的服务器 | 家仍在手机；API Key 在自己的 relay | 自己管理服务 |
 | 没有服务器，只用手机 | 点下面的 Render 按钮托管私人 relay | 家仍在手机；API Key 在私人 relay | 托管平台更新 relay |
 | 只拿漂浮物 / 星图 / 叠卡 | 先看 [Showcase](https://tangfanovo.github.io/fuyue/showcase/)，再用 `npm run packs:list` | 跟随自己的项目 | 跟随自己的项目 |
@@ -118,7 +118,7 @@ Android 不是另一套前端：它使用同一份 `apps/web` 和 LocalData，�
 
 开发构建、CI 调试包、密钥边界和重生导入见 [Android APK 说明](./docs/ANDROID.md)。
 
-GitHub 候选仓库包含两个 workflow：“Deploy PWA to GitHub Pages”生成 iPhone / iPad 可安装的 HTTPS PWA，“Android debug APK”生成可下载的调试 APK。两者既可手动运行，也会在推送到 `main` 时自动触发；fork 后不想自动发布或构建，应先修改或停用对应 workflow。PWA 只部署静态前端，relay 仍需自建或另行托管。
+GitHub 候选仓库包含两个 workflow：“Deploy PWA to GitHub Pages”生成 iPhone / iPad 可安装的 HTTPS PWA，“Android APK”保留 14 天调试产物，并为本仓库更新固定签名的滚动 beta Release。两者既可手动运行，也会在推送到 `main` 时自动触发。PWA 只部署静态前端，relay 仍需自建或另行托管。
 
 ## 只用 LocalData
 

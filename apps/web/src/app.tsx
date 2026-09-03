@@ -4968,6 +4968,8 @@ function ConnectionPanel({
     }
   }
   function connectionMessage(cause: unknown) {
+    if (cause instanceof GatewayError && cause.status === 401 && mode === "service")
+      return "服务可能刚从休眠中恢复，请重新输入接入码连接。";
     if (cause instanceof TypeError)
       return mode === "local"
         ? "没有找到本机 relay。先在项目目录运行 npm run dev:all，再重试。"

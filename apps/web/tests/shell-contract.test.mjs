@@ -246,6 +246,7 @@ test("relay settings never ask for provider API keys", () => {
   assert.match(source, /HttpOnly 会话/);
   assert.match(source, /render\.com\/deploy\?repo=https:\/\/github\.com\/TangfanOVO\/fuyue/);
   assert.match(source, /一键部署私人 relay/);
+  assert.match(source, /服务可能刚从休眠中恢复，请重新输入接入码连接/);
   assert.doesNotMatch(source, /Gemini API Key|DeepSeek API Key|GLM API Key/);
 });
 

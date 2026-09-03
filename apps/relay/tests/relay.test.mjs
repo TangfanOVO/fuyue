@@ -444,7 +444,9 @@ test("phone access code becomes an HttpOnly session and is rate-bound", async (c
   const health = await fetch(`${baseUrl}/healthz`);
   assert.equal(health.status, 200);
   assert.deepEqual(await health.json(), { ok: true, service: "fuyue-self-hosted-relay" });
-  assert.equal((await fetch(`${baseUrl}/v1/status`)).status, 401);
+  const missingSession = await fetch(`${baseUrl}/v1/status`);
+  assert.equal(missingSession.status, 401);
+  assert.match((await missingSession.json()).detail, /休眠中恢复.*重新输入接入码/);
   assert.equal((await fetch(`${baseUrl}/v1/session/exchange`, { method: "POST", headers: { "content-type": "application/json", origin: "http://127.0.0.1:4173" }, body: JSON.stringify({ code: "wrong" }) })).status, 401);
   const exchange = await fetch(`${baseUrl}/v1/session/exchange`, { method: "POST", headers: { "content-type": "application/json", origin: "http://127.0.0.1:4173" }, body: JSON.stringify({ code: "phone-access-code-1234" }) });
   assert.equal(exchange.status, 200);

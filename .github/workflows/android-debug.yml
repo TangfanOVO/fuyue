@@ -1,4 +1,4 @@
-name: Android debug APK
+name: Android APK
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -40,3 +40,41 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
+      - name: Prepare official release signing
+        if: github.repository == 'TangfanOVO/fuyue'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.FUYUE_ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.FUYUE_ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.FUYUE_ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.FUYUE_ANDROID_KEY_PASSWORD }}
+        run: |
+          test -n "$KEYSTORE_BASE64" && test -n "$KEYSTORE_PASSWORD" && test -n "$KEY_ALIAS" && test -n "$KEY_PASSWORD"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/fuyue-release.p12"
+          chmod 600 "$RUNNER_TEMP/fuyue-release.p12"
+          echo "FUYUE_ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/fuyue-release.p12" >> "$GITHUB_ENV"
+          echo "FUYUE_ANDROID_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "FUYUE_ANDROID_KEY_ALIAS=$KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "FUYUE_ANDROID_KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
+          echo "FUYUE_VERSION_CODE=$((1000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
+          echo "FUYUE_VERSION_NAME=0.1.${GITHUB_RUN_NUMBER}-beta" >> "$GITHUB_ENV"
+      - name: Build signed rolling beta APK
+        if: github.repository == 'TangfanOVO/fuyue'
+        working-directory: android
+        run: ./gradlew assembleRelease
+      - name: Verify and name signed beta APK
+        if: github.repository == 'TangfanOVO/fuyue'
+        run: |
+          "$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner" verify --verbose --print-certs android/app/build/outputs/apk/release/app-release.apk
+          cp android/app/build/outputs/apk/release/app-release.apk fuyue-beta.apk
+      - name: Publish rolling APK release
+        if: github.repository == 'TangfanOVO/fuyue'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git tag --force apk "$GITHUB_SHA"
+          git push origin refs/tags/apk --force
+          if gh release view apk >/dev/null 2>&1; then
+            gh release upload apk fuyue-beta.apk --clobber
+          else
+            gh release create apk fuyue-beta.apk --title "赴约 Android beta（滚动更新）" --prerelease --notes "固定签名的公开 beta。以后可直接安装同一入口的新版本覆盖更新。"
+          fi

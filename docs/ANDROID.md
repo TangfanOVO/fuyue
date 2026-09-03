@@ -2,6 +2,12 @@
 
 Android 与 iPhone PWA 使用同一份 `apps/web` 前端和同一份 `fuyue-portable` LocalData。`android/` 只增加原生容器与设备边界，不维护第二套页面。
 
+## 下载公开 beta
+
+[滚动 APK 下载地址](https://github.com/TangfanOVO/fuyue/releases/download/apk/fuyue-beta.apk)始终指向最近一次通过测试并使用赴约固定签名构建的 beta。以后从同一入口下载新版并覆盖安装，Android 会沿用原来的应用 LocalData。
+
+早期文件名带 `debug` 的测试包使用 `love.fuyue.phone.qa`，可以和正式 beta 并存。先在测试版“本地副本”导出完整 JSON，再到正式 beta 导入；确认资料齐全后即可移除测试版。
+
 ## 资料与更新
 
 APK 把 LocalData 放在 Android 应用自己的 WebView / IndexedDB 沙箱里，relay 只处理模型连接。使用同一包名和同一签名安装新版时，Android 会沿用原来的应用数据；如果选择先卸载再安装，就先导出一份完整副本，再在新版本中导入。
@@ -42,9 +48,9 @@ npm ci
 npm run android:debug
 ```
 
-产物位于 `android/app/build/outputs/apk/debug/app-debug.apk`。也可以在 GitHub Actions 手动运行 “Android debug APK”，下载 14 天内有效的构建产物；该 workflow 也会在推送到 `main` 时自动触发，不想自动构建时应先关闭它的 `push` 触发。
+产物位于 `android/app/build/outputs/apk/debug/app-debug.apk`。也可以在 GitHub Actions 手动运行 “Android APK”，下载 14 天内有效的调试产物；该 workflow 也会在推送到 `main` 时自动触发。
 
-Debug APK 适合自己安装和验收。面向公众发布应由发行者创建自己的签名密钥、妥善离线保管并构建签名 release；仓库和 CI 不包含任何签名私钥。
+Debug APK 适合开发验收。本仓库的公开 beta 使用由仓库 Secrets 提供的固定签名；fork 默认仍只生成 debug 产物。想发布自己的可更新 APK 时，在 fork 中配置自己的 keystore 和四项 `FUYUE_ANDROID_*` Secrets。
 
 ## 不反复下载：手机预览与安卓联调壳
 

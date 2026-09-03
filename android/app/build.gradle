@@ -1,5 +1,13 @@
 apply plugin: 'com.android.application'
 
+def releaseStorePath = System.getenv("FUYUE_ANDROID_KEYSTORE_FILE")
+def releaseStorePassword = System.getenv("FUYUE_ANDROID_KEYSTORE_PASSWORD")
+def releaseKeyAlias = System.getenv("FUYUE_ANDROID_KEY_ALIAS")
+def releaseKeyPassword = System.getenv("FUYUE_ANDROID_KEY_PASSWORD")
+def hasReleaseSigning = [releaseStorePath, releaseStorePassword, releaseKeyAlias, releaseKeyPassword].every { it }
+def fuyueVersionCode = (System.getenv("FUYUE_VERSION_CODE") ?: "2").toInteger()
+def fuyueVersionName = System.getenv("FUYUE_VERSION_NAME") ?: "0.1.1-test"
+
 android {
     namespace = "love.fuyue.phone"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,13 +15,23 @@ android {
         applicationId "love.fuyue.phone"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "0.1.1-test"
+        versionCode fuyueVersionCode
+        versionName fuyueVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
              // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    signingConfigs {
+        release {
+            if (hasReleaseSigning) {
+                storeFile file(releaseStorePath)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
         }
     }
     buildTypes {
@@ -22,10 +40,20 @@ android {
             versionNameSuffix "-qa"
         }
         release {
+            if (hasReleaseSigning) signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+}
+
+tasks.register("requireReleaseSigning") {
+    doLast {
+        if (!hasReleaseSigning) throw new GradleException("Release signing environment is incomplete")
+    }
+}
+tasks.matching { it.name in ["assembleRelease", "bundleRelease"] }.configureEach {
+    dependsOn tasks.named("requireReleaseSigning")
 }
 
 repositories {
