@@ -126,7 +126,7 @@ export const BUILTIN_CAPABILITY_PACKS: CapabilityPackManifest[] = [
     version: "1.0.0",
     capabilities: [
       { id: "reading.together", packId: "fuyue-reading", label: "共读书房", summary: "赴约保留自己的共读前端；因为我们使用很轻，完整阅读能力推荐采用 Readest。", optional: true, frontendIncluded: true, bundledImplementation: "surface", supportedModes: ["custom_backend", "fuyue_service", "disabled"], requires: ["shell.localdata"], backend: backend("/v1/reading", ["GET /status"], ["POST /progress", "POST /annotations", "GET /presence"]), provenance: { upstreamUrl: "https://github.com/readest/readest", license: "AGPL-3.0-or-later", recommendation: "upstream_available" } },
-      { id: "reading.engawa", packId: "fuyue-reading", label: "Engawa 阅读侧廊", summary: "网页、RSS、订阅书架与每日阅读；MIT 侧车安装器、relay 适配和前端均已带入。", optional: true, frontendIncluded: true, bundledImplementation: "ready", supportedModes: ["local", "custom_backend", "fuyue_service", "disabled"], requires: ["shell.localdata"], backend: backend("/v1/reading/engawa", ["GET /status"], ["POST /action"]), provenance: { upstreamUrl: "https://github.com/tsuru0805/engawa-mcp", license: "MIT", recommendation: "adapter_ok" } },
+      { id: "reading.engawa", packId: "fuyue-reading", label: "Engawa 阅读侧廊", summary: "网页、RSS、订阅书架与每日阅读；MIT 安装工具、转接服务适配和前端均已带入。", optional: true, frontendIncluded: true, bundledImplementation: "ready", supportedModes: ["local", "custom_backend", "fuyue_service", "disabled"], requires: ["shell.localdata"], backend: backend("/v1/reading/engawa", ["GET /status"], ["POST /action"]), provenance: { upstreamUrl: "https://github.com/tsuru0805/engawa-mcp", license: "MIT", recommendation: "adapter_ok" } },
     ],
   },
   {
@@ -145,7 +145,7 @@ export const BUILTIN_CAPABILITY_PACKS: CapabilityPackManifest[] = [
     version: "1.0.0",
     capabilities: [
       { id: "media.listening", packId: "fuyue-shared-media", label: "一起听", summary: "赴约保留自己的共听前端；完整同步房间推荐采用 music-together。", optional: true, frontendIncluded: true, bundledImplementation: "surface", supportedModes: ["custom_backend", "fuyue_service", "disabled"], requires: ["shell.localdata"], backend: backend("/v1/listening", ["GET /status"], ["POST /control", "GET /events"]), provenance: { upstreamUrl: "https://github.com/Yueby/music-together", license: "AGPL-3.0", recommendation: "upstream_available" } },
-      { id: "media.cobrowse", packId: "fuyue-shared-media", label: "一起看", summary: "从聊天或空间分享公开小红书/GitHub 链接；relay 真读标题与摘要后评论，记录进入 LocalData。", optional: true, frontendIncluded: true, bundledImplementation: "ready", supportedModes: ["local", "custom_backend", "fuyue_service", "disabled"], requires: ["shell.localdata", "chat.continuous"], backend: backend("/v1/cobrowse", ["POST /comment"], []) },
+      { id: "media.cobrowse", packId: "fuyue-shared-media", label: "一起看", summary: "从聊天或空间分享公开小红书/GitHub 链接；转接服务读到真实标题与摘要后再评论，记录留在本机。", optional: true, frontendIncluded: true, bundledImplementation: "ready", supportedModes: ["local", "custom_backend", "fuyue_service", "disabled"], requires: ["shell.localdata", "chat.continuous"], backend: backend("/v1/cobrowse", ["POST /comment"], []) },
     ],
   },
   {
@@ -195,7 +195,7 @@ export const BUILTIN_CAPABILITY_PACKS: CapabilityPackManifest[] = [
     version: "1.0.0",
     capabilities: [
       { id: "leisure.fishing", packId: "fuyue-leisure", label: "一起钓鱼", summary: "PolyForm 非商业许可的上游玩法；只指路原作，不混入赴约 AGPL 核心包。", optional: true, frontendIncluded: false, bundledImplementation: "none", supportedModes: ["custom_backend", "disabled"], requires: ["rooms.shared"], backend: backend("/v1/leisure/fishing", ["GET /status"], ["POST /cast"]), provenance: { upstreamUrl: "https://github.com/tutusagi/ai-fishing-game", license: "PolyForm Noncommercial 1.0.0", recommendation: "upstream_available" } },
-      { id: "leisure.games", packId: "fuyue-leisure", label: "一起游戏", summary: "按许可证独立安装的游戏房契约。", optional: true, frontendIncluded: false, bundledImplementation: "none", supportedModes: ["local", "custom_backend", "disabled"], requires: ["rooms.shared"], backend: backend("/v1/games", ["GET /status"], ["POST /session"]) },
+      { id: "leisure.games", packId: "fuyue-leisure", label: "一起游戏", summary: "按许可证独立安装的游戏房接口说明。", optional: true, frontendIncluded: false, bundledImplementation: "none", supportedModes: ["local", "custom_backend", "disabled"], requires: ["rooms.shared"], backend: backend("/v1/games", ["GET /status"], ["POST /session"]) },
       { id: "leisure.toys", packId: "fuyue-leisure", label: "玩具盒", summary: "本机导入或由伙伴创建单文件玩具；在无网络、无同源权限沙箱中运行，活动进入 LocalData。", optional: true, frontendIncluded: true, bundledImplementation: "ready", supportedModes: ["local", "disabled"], requires: ["shell.localdata"] },
     ],
   },
@@ -226,7 +226,7 @@ export function createCapabilityBuildPlan(
         : choice === "fuyue_service"
           ? "使用实现同一公开协议的现成服务；密钥、账号和计量留在服务端。"
           : choice === "custom_backend"
-            ? "按公开契约连接采用者自己的后端。"
+            ? "按公开接口说明连接使用者自己的后端。"
             : "仅启用已经随公开壳提供的本地实现。";
   return {
     format: "fuyue-build-plan",
@@ -257,6 +257,6 @@ export function localCapabilityStatus(): CapabilityStatus[] {
     id: item.id,
     mode: item.bundledImplementation === "ready" ? "local" : "disabled",
     state: item.bundledImplementation === "ready" ? "local_only" : item.bundledImplementation === "surface" ? "surface_only" : "needs_backend",
-    detail: item.id === "call.realtime" ? "电话前端、归档与语音桥已内置；使用前配置 ElevenLabs、豆包或兼容语音服务" : item.bundledImplementation === "ready" ? "前端与 LocalData 可用" : item.bundledImplementation === "surface" ? "前端入口与开放契约已带；运行实现尚未内置" : "需要安装兼容能力包",
+    detail: item.id === "call.realtime" ? "电话界面、原文记录与语音连接已带；使用前配置 ElevenLabs、豆包或其他兼容语音服务" : item.bundledImplementation === "ready" ? "界面和本机资料都可用" : item.bundledImplementation === "surface" ? "界面和公开接口说明已带；还需要接入运行服务" : "需要安装可配合赴约使用的功能包",
   }));
 }

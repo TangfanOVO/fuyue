@@ -240,33 +240,51 @@ test("model tools are grounded in the current request and their audit result ret
 });
 
 test("relay settings never ask for provider API keys", () => {
-  assert.match(source, /Relay URL/);
+  assert.match(source, /转接服务地址（relay URL）/);
   assert.match(source, /API Key 不进入浏览器/);
   assert.match(source, /订阅接入码/);
   assert.match(source, /接入码只用来换取安全会话，不写入 LocalData/);
   assert.match(source, /render\.com\/deploy\?repo=https:\/\/github\.com\/TangfanOVO\/fuyue/);
-  assert.match(source, /一键部署私人 relay/);
+  assert.match(source, /没有服务？用 Render 一键部署/);
   assert.match(source, /服务可能刚从休眠中恢复，请重新输入接入码连接/);
   assert.doesNotMatch(source, /Gemini API Key|DeepSeek API Key|GLM API Key/);
 });
 
 test("DeepSeek first run connects through the local relay without a browser key field", () => {
+  assert.match(source, /npm run setup/);
   assert.match(source, /npm run setup:deepseek/);
   assert.match(source, /npm run dev:all/);
   assert.match(source, /connect\("http:\/\/127\.0\.0\.1:8787"\)/);
-  assert.match(source, /relay 已经在线，但还没有配置可聊天的模型/);
+  assert.match(source, /转接服务已经在线，但还没有配置聊天厂商/);
   assert.match(chat, /原话已保存/);
   assert.match(chat, /只重试伙伴回复/);
+});
+
+test("connection help explains relay choices and safe AI assistance in plain language", () => {
+  assert.match(source, /转接服务（代码里叫 relay）/);
+  assert.match(source, /接口说明（文档里叫契约）/);
+  for (const label of ["有电脑", "只有手机", "已有服务"]) assert.match(source, new RegExp(label));
+  assert.match(source, /不要让我把 API Key 或接入码发给你/);
+  for (const label of ["DeepSeek", "OpenAI API", "Gemini API", "Anthropic API", "智谱 GLM", "通义千问", "Kimi", "OpenRouter"]) assert.match(source, new RegExp(label));
+  assert.match(source, /ElevenLabs 或豆包声音/);
 });
 
 test("Android falls back to a configured relay until a native key is truly active", () => {
   assert.match(source, /const nativeActive\s*=\s*nativeAvailable\s*&&\s*Boolean\(nativeState\?\.configured\)/);
   assert.match(source, /const gateway\s*=\s*nativeActive\s*\?\s*nativeClient\s*:\s*relayClient/);
-  assert.match(source, /gatewayStatus\?\.ok[\s\S]{0,80}?nativeActive[\s\S]{0,80}?"Android 直连已连接"[\s\S]{0,80}?"relay 已连接"/);
+  assert.match(source, /gatewayStatus\?\.ok[\s\S]{0,80}?nativeActive[\s\S]{0,80}?"Android 直连已连接"[\s\S]{0,80}?"转接服务已连接"/);
   assert.match(source, /companion\?\.signature \|\| "点这里写一句个签"/);
   assert.doesNotMatch(source, /const gateway = nativeAvailable \?/);
-  assert.match(source, /先回到‘Android 直连’清除原生配置/);
-  assert.match(source, /清除已保存的 relay 连接/);
+  assert.match(source, /回到“Android 本机 Key”清除旧配置/);
+  assert.match(source, /清除已保存的服务地址/);
+});
+
+test("drawer badges report live capability state in plain language", () => {
+  assert.match(source, /capabilityStates\.set\(item\.id, item\)/);
+  assert.match(source, /capabilityStateLabels\[liveState\]/);
+  for (const label of ["现在可用", "本机可用", "只带界面", "还需接服务", "暂不可用"]) assert.match(source, new RegExp(label));
+  assert.match(source, /providerCapabilitySummary\(provider\.capabilities\)/);
+  for (const label of ["聊天", "操作本机功能", "看图", "语音"]) assert.match(source, new RegExp(label));
 });
 
 test("chat plus actions describe requests and share the same honest extension panels", () => {

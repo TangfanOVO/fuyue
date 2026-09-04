@@ -217,12 +217,12 @@ export function VoiceCallPanel({ repository, conversation, messages, people, mem
   }
 
   async function startBrowserFullDuplex() {
-    if (stage !== "idle") return; if (!chatGateway) { setError("先连接一个聊天模型，relay 语音只负责实时听和说。"); return; } resetCallTurns(); setError(""); setNotice(""); setPartial(""); setMuted(false); setTranscriptOpen(false); setElapsedSeconds(0); callStartedAtRef.current = Date.now(); setStage("connecting");
+    if (stage !== "idle") return; if (!chatGateway) { setError("请先连接聊天模型；实时语音服务只负责听和说。"); return; } resetCallTurns(); setError(""); setNotice(""); setPartial(""); setMuted(false); setTranscriptOpen(false); setElapsedSeconds(0); callStartedAtRef.current = Date.now(); setStage("connecting");
     try {
       const controller = await startBrowserLiveCall({ relayUrl, sessionToken: relaySessionToken, instructions: fullDuplexInstructions(), onEvent: handleNativeLiveEvent });
       browserLiveRef.current = controller; nativeLiveActive.current = true;
       nativeLiveTimerRef.current = window.setTimeout(() => void stopEverything(), 20 * 60_000); setStage("live");
-    } catch (cause) { if (nativeLiveTimerRef.current !== null) window.clearTimeout(nativeLiveTimerRef.current); nativeLiveTimerRef.current = null; browserLiveRef.current = null; nativeLiveActive.current = false; callStartedAtRef.current = 0; setError(cause instanceof Error ? cause.message : "relay 全双工电话没有开始"); setStage("idle"); }
+    } catch (cause) { if (nativeLiveTimerRef.current !== null) window.clearTimeout(nativeLiveTimerRef.current); nativeLiveTimerRef.current = null; browserLiveRef.current = null; nativeLiveActive.current = false; callStartedAtRef.current = 0; setError(cause instanceof Error ? cause.message : "实时电话没有开始，请检查语音服务后重试"); setStage("idle"); }
   }
 
   async function startPlatformFullDuplex() { if (nativeAvailable) await startNativeFullDuplex(); else await startBrowserFullDuplex(); }
@@ -230,7 +230,7 @@ export function VoiceCallPanel({ repository, conversation, messages, people, mem
   async function startRecorder() {
     if (isTrueDuplex) { await startPlatformFullDuplex(); return; }
     if (stage !== "idle") return; resetCallTurns(); setError(""); setNotice(""); setPartial(""); setMuted(false); setTranscriptOpen(false); setElapsedSeconds(0); callStartedAtRef.current = Date.now();
-    if (!chatGateway) { setError("先连接一个聊天模型，语音 provider 只负责听和说。"); return; }
+    if (!chatGateway) { setError("请先连接聊天模型；语音服务只负责听和说。"); return; }
     if (!voiceGateway || !selectedVoiceProvider) { setError(languageSetupMessage); return; }
     try {
       if (nativeAvailable && nativeState?.microphone !== "granted") { const next = await requestNativeMicrophone(); setNativeState(next); if (next.microphone !== "granted") throw new Error("没有麦克风权限，电话没有开始"); }
@@ -387,7 +387,7 @@ export function VoiceCallPanel({ repository, conversation, messages, people, mem
           <button className="primary-button full-button" disabled={!apiKey.trim() || !voice.trim() || configuring} onClick={() => void saveVoice()}>{configuring ? <SpinnerGap className="spin" /> : <FloppyDisk />}{configuring ? "正在验证" : "保存语音"}</button>
         </section>}
         <label className="call-retention"><input type="checkbox" checked={keepRecordings} disabled={isTrueDuplex} onChange={(event) => { setKeepRecordings(event.target.checked); window.localStorage.setItem("fuyue-public-keep-call-audio", String(event.target.checked)); }} /><span><strong>{isTrueDuplex ? "这条全双工链只留文字" : "保留通话录音"}</strong><small>{isTrueDuplex ? "每轮完成后保存转写和回复。" : "录音会和转写一起留在本机。"}</small></span></label>
-        {statusError && <p className="form-error">{statusError}</p>}{!nativeAvailable && !status?.ok && <p className="call-tech-note">PWA 需要由自托管 relay 提供语音配置。</p>}
+        {statusError && <p className="form-error">{statusError}</p>}{!nativeAvailable && !status?.ok && <p className="call-tech-note">网页版需要先连接自己的转接服务，才能使用语音。</p>}
       </div></details>
     </> : <section className="public-call-records" aria-label="通话记录列表">
       <header><div><h2>我们的通话原文</h2><p>从同一份聊天账本整理，录到声音的还可以回放。</p></div></header>

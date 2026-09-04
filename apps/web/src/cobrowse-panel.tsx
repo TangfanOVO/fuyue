@@ -86,7 +86,7 @@ export function CobrowsePanel({
       await onChange();
       if (!gateway?.cobrowseComment)
         throw new Error(
-          "分享已经留在本机；连接自托管 relay 后才能真的读取页面并请伙伴评论。",
+          "分享已经留在本机；连接自己的转接服务后，伙伴才能真的读取页面并评论。",
         );
       const result = await gateway.cobrowseComment(url.trim(), note.trim());
       await repository.createRoomEntry({
@@ -197,7 +197,7 @@ export function CobrowsePanel({
                   <small>{reply.sourceLabel}</small>
                 </blockquote>
               ) : (
-                <small>等待 relay 真读页面后评论</small>
+                <small>等待已连接的服务读完页面后评论</small>
               )}
             </article>
           ))

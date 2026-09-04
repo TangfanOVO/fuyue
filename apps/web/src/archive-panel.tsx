@@ -5,7 +5,7 @@ import type { LocalDataRepository, Message, MessageArchiveState, PersonProfile }
 function sourceName(message: Message) {
   if (message.source === "chatgpt_work") return "ChatGPT Work";
   if (message.source === "codex") return "Codex";
-  if (message.source === "relay") return message.modelLabel || message.sourceLabel || "relay";
+  if (message.source === "relay") return message.modelLabel || message.sourceLabel || "模型服务";
   if (message.source === "external_import") return message.sourceLabel || "外部导入";
   if (message.source === "system_seed") return "本地示例";
   return message.sourceLabel || "本地记录";

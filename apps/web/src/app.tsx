@@ -26,6 +26,7 @@ import {
   PhoneCall,
   PlugsConnected,
   Plus,
+  Question,
   ShieldCheck,
   Sparkle,
   SpinnerGap,
@@ -291,7 +292,7 @@ const featureCatalog: Record<string, FeatureInfo> = {
     title: "一起看",
     note: "聊天和空间都能发公开链接",
     requirement:
-      "relay 只在读到公开小红书/GitHub 标题与摘要后评论；登录墙会明确失败。",
+      "转接服务只在读到公开小红书/GitHub 标题与摘要后评论；遇到登录墙会直接说明读不到。",
   },
   "leisure.games": {
     capabilityId: "leisure.games",
@@ -468,14 +469,14 @@ function recognizeProviderPaste(value: string): {
       preset: null,
       apiKey: "",
       unsupported:
-        "这是 Gemini 凭据；Android 直连当前使用兼容接口，请在 relay / 手机服务里接 Gemini。",
+        "这是 Gemini 凭据；Android 本机直连目前不收这种 Key，请改用“只有手机”或“已有服务”。",
     };
   if (/sk-ant-[\w-]{16,}/.test(normalized) || lower.includes("anthropic"))
     return {
       preset: null,
       apiKey: "",
       unsupported:
-        "这是 Anthropic 凭据；请在 relay / 手机服务里接入，Key 不应交给通用兼容接口。",
+        "这是 Anthropic 凭据；Android 本机直连目前不收这种 Key，请改用“只有手机”或“已有服务”。",
     };
   const preset =
     NATIVE_PROVIDER_PRESETS.find((item) =>
@@ -678,7 +679,7 @@ export function App() {
         setGatewayError(
           results[0].reason instanceof Error
             ? results[0].reason.message
-            : "relay 暂时不可用",
+            : "模型转接服务暂时不可用，请稍后重试",
         );
         return;
       }
@@ -1266,7 +1267,7 @@ export function App() {
       !status.providers.some((item) => item.id === status.activeProviderId)
     ) {
       throw new GatewayError(
-        "relay 已经在线，但还没有配置可聊天的模型。DeepSeek 用户先运行 npm run setup:deepseek。",
+        "转接服务已经在线，但还没有配置聊天厂商。请重新运行配置向导；只用 DeepSeek 时可运行 npm run setup:deepseek。",
         422,
       );
     }
@@ -1404,7 +1405,7 @@ export function App() {
               gatewayStatus?.ok
                 ? nativeActive
                   ? "Android 直连已连接"
-                  : "relay 已连接"
+                  : "转接服务已连接"
                 : "当前使用 LocalData"
             }
           >
@@ -1842,6 +1843,11 @@ function FeatureDrawer({
   );
   const later = (capabilityId: CapabilityId) => () =>
     openFeature(featureFor(capabilityId));
+  const capabilityStates = new Map(
+    localCapabilityStatus().map((item) => [item.id, item]),
+  );
+  for (const item of gatewayStatus?.capabilities || [])
+    capabilityStates.set(item.id, item);
   const groups: Array<{ id: string; title: string; items: DrawerEntry[] }> = [
     {
       id: "roots",
@@ -1890,11 +1896,12 @@ function FeatureDrawer({
       items: [
         {
           id: "call",
+          capabilityId: "call.realtime",
           title: "电话与声音",
           aliases: "电话 电话与共听",
           note: "通话、实时转写与同一份原文",
           icon: <PhoneCall />,
-          state: "内置",
+          state: "随包可用",
           action: () => openPanel("call"),
         },
         {
@@ -1903,7 +1910,7 @@ function FeatureDrawer({
           title: "玩具盒",
           note: `${toyCount} 个本机玩具，可让${companionName}动手做`,
           icon: <GearSix />,
-          state: "本地",
+          state: "本机可用",
           action: () => openPanel("toys"),
         },
       ],
@@ -1945,7 +1952,7 @@ function FeatureDrawer({
           id: "mood",
           capabilityId: "companion.mood",
           title: `${companionName}的心情`,
-          note: "只显示 relay 明确返回的可见状态",
+          note: "只显示已连接服务明确返回的可见状态",
           icon: <Heart />,
           action: () => openPanel("mood"),
         },
@@ -2022,7 +2029,7 @@ function FeatureDrawer({
           title: "健康与提醒授权",
           note: "需要 Android / iOS 原生桥接",
           icon: <Heart />,
-          state: "待接",
+          state: "需手机桥",
           action: later("life.health"),
         },
         {
@@ -2031,7 +2038,7 @@ function FeatureDrawer({
           title: "小小空间",
           note: "发公开链接，等伙伴读完评论",
           icon: <Heart />,
-          state: "内置",
+          state: "随包可用",
           action: () => openPanel("cobrowse"),
         },
         {
@@ -2040,7 +2047,7 @@ function FeatureDrawer({
           title: "共读书房",
           note: "保留赴约前端；完整能力推荐 Readest",
           icon: <BookOpen />,
-          state: "前端 / 推荐",
+          state: "只带界面",
           action: later("reading.together"),
         },
         {
@@ -2049,7 +2056,7 @@ function FeatureDrawer({
           title: "Engawa 阅读侧廊",
           note: "网页、RSS、每日阅读与书架",
           icon: <BookOpen />,
-          state: "内置",
+          state: "随包可用",
           action: () => openPanel("engawa"),
         },
         {
@@ -2058,7 +2065,7 @@ function FeatureDrawer({
           title: "一起听",
           note: "保留赴约前端；完整能力推荐 music-together",
           icon: <Heart />,
-          state: "前端 / 推荐",
+          state: "只带界面",
           action: later("media.listening"),
         },
         {
@@ -2067,7 +2074,7 @@ function FeatureDrawer({
           title: "一起看",
           note: "聊天或空间发小红书 / GitHub 链接",
           icon: <Link />,
-          state: "内置",
+          state: "随包可用",
           action: () => openPanel("cobrowse"),
         },
         {
@@ -2076,7 +2083,7 @@ function FeatureDrawer({
           title: "颜文字",
           note: "聊天加号中的本地完整抽屉",
           icon: <Sparkle />,
-          state: "本地",
+          state: "本机可用",
           action: () => chooseView("chat"),
         },
         {
@@ -2086,7 +2093,7 @@ function FeatureDrawer({
           aliases: "一起斗地主",
           note: "不捆绑私人牌桌与受限素材",
           icon: <Sparkle />,
-          state: "待装",
+          state: "未安装",
           action: later("leisure.games"),
         },
         {
@@ -2095,7 +2102,7 @@ function FeatureDrawer({
           title: "一起钓鱼",
           note: "非商业上游玩法，不预装",
           icon: <Sparkle />,
-          state: "上游优先",
+          state: "去原作",
           action: later("leisure.fishing"),
         },
         {
@@ -2104,7 +2111,7 @@ function FeatureDrawer({
           title: "旅行手记",
           note: "Journey Cards 纯文字适配；一句话也能留",
           icon: <Notebook />,
-          state: "内置",
+          state: "随包可用",
           action: () => openPanel("journey"),
         },
         {
@@ -2114,7 +2121,7 @@ function FeatureDrawer({
           note: "可选上游适配，优先安装原项目",
           aliases: "Nowhere 旅行",
           icon: <Link />,
-          state: "上游优先",
+          state: "去原作",
           action: later("travel.upstream"),
         },
       ],
@@ -2135,7 +2142,7 @@ function FeatureDrawer({
         {
           id: "connection",
           title: "模型连接",
-          note: "自托管 relay 或 Android Keystore",
+          note: "自己的转接服务或 Android 本机 Key",
           icon: <PlugsConnected />,
           action: () => openPanel("connection"),
         },
@@ -2164,7 +2171,7 @@ function FeatureDrawer({
         {
           id: "about",
           title: "边界与接口",
-          note: "隐私承诺和后端契约",
+          note: "隐私说明和接入方法",
           icon: <ShieldCheck />,
           action: () => openPanel("about"),
         },
@@ -2232,8 +2239,14 @@ function FeatureDrawer({
           {visibleGroups.map((group) => (
             <section className="drawer-group" key={group.id}>
               <h2>{group.title}</h2>
-              {group.items.map((item) => (
-                <button
+              {group.items.map((item) => {
+                const liveState = item.capabilityId
+                  ? capabilityStates.get(item.capabilityId)?.state
+                  : undefined;
+                const stateLabel = liveState
+                  ? capabilityStateLabels[liveState]
+                  : item.state;
+                return <button
                   className="drawer-entry"
                   data-drawer-entry-id={item.id}
                   onClick={() => activate(item.action)}
@@ -2244,9 +2257,9 @@ function FeatureDrawer({
                     <b>{item.title}</b>
                     <small>{item.note}</small>
                   </span>
-                  {item.state ? <em>{item.state}</em> : <ArrowRight />}
-                </button>
-              ))}
+                  {stateLabel ? <em>{stateLabel}</em> : <ArrowRight />}
+                </button>;
+              })}
             </section>
           ))}
           {!visibleGroups.length && (
@@ -2670,6 +2683,17 @@ function FeaturePanel({
     </div>
   );
 }
+const providerCapabilityLabels: Record<string, string> = {
+  chat: "聊天",
+  tools: "操作本机功能",
+  vision: "看图",
+  audio: "语音",
+};
+function providerCapabilitySummary(capabilities: readonly string[]) {
+  return capabilities.length
+    ? capabilities.map((item) => providerCapabilityLabels[item] || item).join(" · ")
+    : "聊天";
+}
 function StatusPanel({
   nativeActive,
   relayUrl,
@@ -2691,7 +2715,7 @@ function StatusPanel({
   const connectionLabel = status?.ok
     ? nativeActive
       ? "Android 原生直连"
-      : "relay 已连接"
+      : "转接服务已连接"
     : configured
       ? "连接已保存，当前不可用"
       : "纯 LocalData 模式";
@@ -2708,7 +2732,7 @@ function StatusPanel({
           <strong>{connectionLabel}</strong>
           <small>
             {status?.ok
-              ? `${status.service} · ${status.providers.length} 个 provider`
+              ? `${status.service} · ${status.providers.length} 个聊天厂商`
               : statusError || "未连接模型也不影响本地记录和导出"}
           </small>
         </span>
@@ -2734,7 +2758,7 @@ function StatusPanel({
             <article key={provider.id}>
               <span>
                 <strong>{provider.label}</strong>
-                <small>{provider.capabilities.join(" · ") || "chat"}</small>
+                <small>{providerCapabilitySummary(provider.capabilities)}</small>
               </span>
               {provider.id === status.activeProviderId && <em>当前</em>}
             </article>
@@ -2756,18 +2780,18 @@ function StatusPanel({
   );
 }
 const capabilityModeLabels: Record<CapabilityRuntimeMode, string> = {
-  local: "内置 / 本地",
-  custom_backend: "自建后端",
-  fuyue_service: "兼容协议服务",
+  local: "直接在本机用",
+  custom_backend: "接自己的服务",
+  fuyue_service: "接现成服务",
   disabled: "不显示",
 };
 const capabilityStateLabels: Record<CapabilityState, string> = {
-  ready: "已验证",
-  local_only: "内置可用",
-  surface_only: "前端与协议已带",
-  needs_backend: "尚未实现",
+  ready: "现在可用",
+  local_only: "本机可用",
+  surface_only: "只带界面",
+  needs_backend: "还需接服务",
   disabled: "已隐藏",
-  error: "异常",
+  error: "暂不可用",
 };
 const installChoiceLabels: Record<
   CapabilityInstallChoice,
@@ -2781,7 +2805,7 @@ const installChoiceLabels: Record<
     label: "只拿前端积木",
     note: "复用外观与交互，后端由自己实现",
   },
-  custom_backend: { label: "接自己的后端", note: "按公开路由契约实现并验证" },
+  custom_backend: { label: "接自己的后端", note: "按公开接口说明接好并验证" },
   fuyue_service: {
     label: "接现成兼容服务",
     note: "只在有真实服务地址时使用；不冒充已开通",
@@ -2834,7 +2858,7 @@ function capabilitySourceLabel(capability: CapabilityDefinition) {
   if (capability.frontendIncluded)
     return capability.provenance ? "赴约前端已带 · 来源可选" : "赴约前端已带";
   if (capability.provenance) return "未带入运行时 · 可先用原作";
-  return "开放契约 · 待带入实现";
+  return "接口说明已带 · 还需接入实现";
 }
 function ModulePanel({
   status,
@@ -2981,7 +3005,7 @@ function ModulePanel({
         `建议路径：${plan.targetPath}`,
         plan.upstream
           ? `参考来源：${plan.upstream.url}（${plan.upstream.license}）`
-          : "参考来源：赴约公开能力契约",
+          : "参考来源：赴约公开接口说明",
         plan.requiredRoutes.length
           ? `必须接口：${plan.requiredRoutes.join("、")}`
           : "必须接口：无",
@@ -3518,7 +3542,7 @@ function HomeView(
             note={
               props.gatewayStatus?.ok
                 ? props.gatewayStatus.service
-                : "接入自己的 relay"
+                : "接入自己的转接服务"
             }
             onClick={() => props.openPanel("connection")}
           />
@@ -3535,7 +3559,7 @@ function HomeView(
             <strong>{props.mood?.title || "等你把窗帘接上"}</strong>
             <em>
               {props.mood?.detail ||
-                "可见心情由你的 relay 明确返回，不冒充隐藏推理。"}
+                "可见心情由你连接的服务明确返回，不冒充隐藏推理。"}
             </em>
           </span>
           <span className="peek-action">再偷看</span>
@@ -3867,7 +3891,7 @@ function StudyView({
       id: "connection",
       icon: <PlugsConnected />,
       title: "模型连接",
-      note: "接入你自己的 relay",
+      note: "接入你自己的转接服务",
       onOpen: () => openPanel("connection"),
     },
     {
@@ -3880,8 +3904,8 @@ function StudyView({
     {
       id: "contract",
       icon: <Link />,
-      title: "接口契约",
-      note: "状态、聊天、日程与心情",
+      title: "接口说明",
+      note: "告诉自己的服务怎样与赴约收发数据",
       onOpen: () => openPanel("about"),
     },
     {
@@ -4062,7 +4086,7 @@ function RoomsView({
             capabilityId: "leisure.games",
             icon: <Sparkle />,
             title: "一起游戏",
-            note: "独立许可游戏包待装",
+            note: "游戏包还没安装",
             onOpen: later("leisure.games"),
           },
           {
@@ -4070,7 +4094,7 @@ function RoomsView({
             capabilityId: "leisure.fishing",
             icon: <Sparkle />,
             title: "一起钓鱼",
-            note: "非商业上游优先",
+            note: "建议先用原作",
             onOpen: later("leisure.fishing"),
           },
           {
@@ -4102,7 +4126,7 @@ function RoomsView({
             capabilityId: "companion.mood",
             icon: <Heart />,
             title: "伙伴的心情",
-            note: "relay 明确返回的可见状态",
+            note: "已连接服务明确返回的可见状态",
             onOpen: () => openPanel("mood"),
           },
           {
@@ -4182,14 +4206,14 @@ function RoomsView({
             id: "status",
             icon: <ShieldCheck />,
             title: "运行状态",
-            note: "LocalData、provider 与连接错误",
+            note: "本机资料、聊天厂商与连接问题",
             onOpen: () => openPanel("status"),
           },
           {
             id: "connection",
             icon: <PlugsConnected />,
             title: "模型连接",
-            note: "自托管 relay 与 provider",
+            note: "自己的转接服务与聊天厂商",
             onOpen: () => openPanel("connection"),
           },
           {
@@ -4218,7 +4242,7 @@ function RoomsView({
             id: "about",
             icon: <ShieldCheck />,
             title: "边界与接口",
-            note: "隐私承诺和后端契约",
+            note: "隐私说明和接入方法",
             onOpen: () => openPanel("about"),
           },
         ],
@@ -4973,7 +4997,7 @@ function ConnectionPanel({
       return "服务可能刚从休眠中恢复，请重新输入接入码连接。";
     if (cause instanceof TypeError)
       return mode === "local"
-        ? "没有找到本机 relay。先在项目目录运行 npm run dev:all，再重试。"
+        ? "没有找到本机转接服务。请先在项目目录运行 npm run dev:all，再重试。"
         : "无法访问这个地址，请检查 HTTPS、网络和 Origin 配置。";
     return cause instanceof Error ? cause.message : "没有连接上服务";
   }
@@ -4983,7 +5007,7 @@ function ConnectionPanel({
     try {
       if (nativeAvailable && nativeState?.configured)
         throw new Error(
-          "当前正在使用 Android 原生 Key。先回到‘Android 直连’清除原生配置，再切换到订阅或 relay，避免表面切换但仍消耗原生 API。",
+          "当前正在使用 Android 本机 Key。请先回到“Android 本机 Key”清除旧配置，再改用“只有手机”或“已有服务”，避免看似切换、实际仍在消耗原来的 API。",
         );
       await onSave(url, code);
       setAccessCode("");
@@ -5016,14 +5040,14 @@ function ConnectionPanel({
   }
   const tabs = nativeAvailable
     ? ([
-        ["native", "Android 直连"],
-        ["service", "手机服务"],
-        ["advanced", "远程 relay"],
+        ["native", "Android 本机 Key"],
+        ["service", "只有手机"],
+        ["advanced", "已有服务"],
       ] as const)
     : ([
-        ["local", "本机 API"],
-        ["service", "手机服务"],
-        ["advanced", "远程 relay"],
+        ["local", "有电脑"],
+        ["service", "只有手机"],
+        ["advanced", "已有服务"],
       ] as const);
   return (
     <div className="panel-content">
@@ -5032,17 +5056,47 @@ function ConnectionPanel({
         note={
           nativeAvailable
             ? "Key 由 Android Keystore 加密保存，不进入 LocalData"
-            : "Key 留在 relay，前端只接统一接口"
+            : "Key 留在转接服务里，网页只负责聊天"
         }
         onBack={onBack}
       />
+      <details className="connection-help">
+        <summary>
+          <Question />
+          这三种连接方式怎么选？
+        </summary>
+        <div>
+          <p>
+            <strong>转接服务（代码里叫 relay）</strong>
+            它替赴约保管 API Key、请求模型，再把回答送回手机。
+          </p>
+          <p>
+            <strong>接口说明（文档里叫契约）</strong>
+            就像统一插头：不管后面是赴约自带的服务还是别人写的服务，只要按同一种格式收发，前端就能接上。
+          </p>
+          <ul>
+            {nativeAvailable && (
+              <li><b>Android 本机 Key：</b>APK 用户直接在手机里保存 Key。</li>
+            )}
+            {!nativeAvailable && (
+              <li><b>有电脑：</b>电脑里下载项目，用终端启动。</li>
+            )}
+            <li><b>只有手机：</b>点 Render 按钮部署一个自己的转接服务。</li>
+            <li><b>已有服务：</b>你已经拿到 HTTPS 服务地址，直接粘贴并检查。</li>
+          </ul>
+          <p className="ask-ai-copy">
+            <strong>不会选？</strong>
+            截图问 AI：“我在赴约的模型连接页，只有【手机/电脑】，想用【厂商名】。请告诉我点哪一栏和下一步；不要让我把 API Key 或接入码发给你。”
+          </p>
+        </div>
+      </details>
       <section className={`connection-state ${status?.ok ? "connected" : ""}`}>
         {status?.ok ? <CheckCircle /> : <CloudSlash />}
         <span>
           <strong>{status?.ok ? "模型服务已连接" : "当前是纯本地模式"}</strong>
           <small>
             {status?.ok
-              ? `${status.service} · ${status.providers.length} 个 provider`
+              ? `${status.service} · ${status.providers.length} 个聊天厂商`
               : "聊天、人物、记忆和导出仍然可用"}
           </small>
         </span>
@@ -5205,26 +5259,30 @@ function ConnectionPanel({
           <section className="mobile-connect-lead local-connect-lead">
             <PlugsConnected />
             <span>
-              <small>DeepSeek 最短路径</small>
-              <h2>Key 一次配置，之后直接聊天</h2>
+              <small>电脑上的完整配置</small>
+              <h2>聊天厂商和声音都能换</h2>
               <p>
-                在下载的项目目录运行下面两步。Key 只写进权限为 600 的 relay
-                配置，不进入网页、导出或 Git。
+                重新运行配置向导就能换厂商。Key 只写进权限为 600
+                的转接服务配置，不进入网页、导出或 Git。
               </p>
             </span>
           </section>
           <ol className="setup-steps">
             <li>
               <span>1</span>
-              <code>npm run setup:deepseek</code>
-              <small>粘贴 Key，终端不会回显</small>
+              <code>npm run setup</code>
+              <small>选聊天厂商，也可顺手配 ElevenLabs 或豆包声音</small>
             </li>
             <li>
               <span>2</span>
               <code>npm run dev:all</code>
-              <small>同时启动网页与本机 relay</small>
+              <small>同时启动网页与本机转接服务</small>
             </li>
           </ol>
+          <p className="field-note local-fast-path">
+            <ShieldCheck />
+            只用 DeepSeek 时仍可跑 <code>npm run setup:deepseek</code>。支持的聊天厂商：DeepSeek、OpenAI API、Gemini API、Anthropic API、智谱 GLM、通义千问、Kimi 和 OpenRouter。
+          </p>
           {error && (
             <p className="form-error" role="alert">
               {error}
@@ -5236,7 +5294,7 @@ function ConnectionPanel({
             onClick={() => void connect("http://127.0.0.1:8787")}
           >
             {testing ? <SpinnerGap className="spin" /> : <PlugsConnected />}
-            {testing ? "正在寻找" : "连接本机 DeepSeek"}
+            {testing ? "正在寻找" : "连接本机模型服务"}
           </button>
         </>
       )}
@@ -5259,7 +5317,7 @@ function ConnectionPanel({
             rel="noreferrer"
           >
             <CloudArrowUp />
-            没有服务？一键部署私人 relay
+            没有服务？用 Render 一键部署
           </a>
           <form className="editor-form" onSubmit={save}>
             <label>
@@ -5309,7 +5367,7 @@ function ConnectionPanel({
       {mode === "advanced" && (
         <form className="editor-form" onSubmit={save}>
           <label>
-            Relay URL
+            转接服务地址（relay URL）
             <input
               type="url"
               inputMode="url"
@@ -5346,17 +5404,18 @@ function ConnectionPanel({
           className="secondary-button danger-text full-button"
           onClick={() => void onDisconnect()}
         >
-          清除已保存的 relay 连接
+          清除已保存的服务地址
         </button>
       )}
       {status?.providers.length ? (
         <section className="provider-list">
-          <h2>服务提供的模型</h2>
+          <h2>已配置的聊天厂商</h2>
+          <p className="provider-list-note">到聊天页顶部即可切换；没出现的厂商，需先在转接服务里加入它的 API Key，再重启服务。</p>
           {status.providers.map((provider) => (
             <article key={provider.id}>
               <span>
                 <strong>{provider.label}</strong>
-                <small>{provider.capabilities.join(" · ") || "chat"}</small>
+                <small>{providerCapabilitySummary(provider.capabilities)}</small>
               </span>
               {provider.id === status.activeProviderId && <em>当前</em>}
             </article>
@@ -5367,8 +5426,7 @@ function ConnectionPanel({
         <h2>已有 ChatGPT / Gemini 订阅能直接用吗？</h2>
         <p>
           通常不能。消费订阅与 API 计费是两套服务；公开版不接管账号
-          Cookie。手机用户最省事的路线，是使用支持这份 relay
-          契约的托管订阅服务。
+          Cookie。手机用户最省事的路线，是部署自己的转接服务，或使用能接入赴约的托管服务。
         </p>
       </section>
     </div>

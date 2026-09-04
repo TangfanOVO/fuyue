@@ -189,7 +189,7 @@ export function ChatView({ repository, conversation, messages, people, memories,
     abortRef.current = controller;
     let collected = ""; let doneContent = "";
     let modelLabel = activeProvider?.label || "";
-    let sourceLabel = "自托管 relay"; let toolTrace: Message["toolTrace"] = [];
+    let sourceLabel = "自己的转接服务"; let toolTrace: Message["toolTrace"] = [];
     const recentCutoff = Date.now() - 48 * 60 * 60 * 1_000;
     const history = messages.filter((message) => message.archiveState === "active" && Date.parse(message.createdAt) >= recentCutoff).slice(-100)
       .map(({ role, content: historyContent, createdAt, source, sourceLabel: historySourceLabel, modelLabel: historyModelLabel, toolTrace: historyToolTrace }) => ({
@@ -212,7 +212,7 @@ export function ChatView({ repository, conversation, messages, people, memories,
     if (clientActions.length) toolTrace = [...toolTrace, ...await executeClientActions({ actions: clientActions, repository, companion, sourceLabel: activeProvider?.label || "模型工具", input })];
     let reply = (doneContent || collected).trim();
     if (!reply && toolTrace.length) { reply = "模型没有返回文字；本机操作结果见下方工具痕迹。"; sourceLabel = `${sourceLabel} · 本机审计提示`; }
-    if (!reply) throw new GatewayError("relay 没有返回可保存的回复");
+    if (!reply) throw new GatewayError("模型服务没有返回完整回复；这次不会写入伙伴消息");
     await repository.appendMessage({ conversationId: conversation.id, role: "companion", content: reply, source: "relay", sourceLabel, modelLabel, toolTrace, parentMessageId: userMessageId });
     setStreaming(""); setRetryTurn(null); setReplyPhase(""); await onMessageSaved();
     if (clientActions.some((action) => action.name === "create_calendar_event")) await onRefresh();
@@ -230,7 +230,7 @@ export function ChatView({ repository, conversation, messages, people, memories,
       savedMessage = message;
       setContent(""); setAttachments([]); await onMessageSaved();
       if (!gateway || manualRole === "companion") return;
-      if (!input) { setNotice("图片已存入 LocalData；当前公开 relay 未声明识图能力，没有把原图外送。"); return; }
+      if (!input) { setNotice("图片已存入本机；当前模型服务没有开启看图能力，因此没有把原图发出去。"); return; }
       await requestReply(input, message.id);
     } catch (cause) {
       setStreaming("");
@@ -343,7 +343,7 @@ export function ChatView({ repository, conversation, messages, people, memories,
         <button onClick={() => cameraInputRef.current?.click()}><span><Camera /></span><b>相机</b></button>
         <button onClick={() => fileInputRef.current?.click()}><span><FileText /></span><b>多选文件</b></button>
         <button onClick={() => folderInputRef.current?.click()}><span><FolderOpen /></span><b>文件夹</b></button>
-        <button onClick={() => { consumePlus(); setContent((current) => `${current}${current ? "\n\n" : ""}请联网搜索（需要 relay 声明搜索能力）：`); }}><span><MagnifyingGlass /></span><b>写搜索请求</b></button>
+        <button onClick={() => { consumePlus(); setContent((current) => `${current}${current ? "\n\n" : ""}请联网搜索（需要已连接的服务支持搜索）：`); }}><span><MagnifyingGlass /></span><b>写搜索请求</b></button>
         <button onClick={() => { consumePlus(); setKaomojiOpen(true); }}><span className="kaomoji-icon">(´･ω･`)</span><b>颜文字</b></button>
         <button onClick={() => { consumePlus(); setVoiceOpen(true); }}><span><SpeakerHigh /></span><b>声音</b></button>
         <button onClick={() => { consumePlus(); onOpenPanel("call"); }}><span><PhoneCall /></span><b>打电话</b></button>

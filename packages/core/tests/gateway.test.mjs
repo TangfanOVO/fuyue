@@ -113,7 +113,7 @@ test("relay client translates browser network failures into a recoverable Chines
   });
   await assert.rejects(
     client.status(),
-    (error) => error instanceof GatewayError && /连接不到 relay/.test(error.message) && !/Failed to fetch/.test(error.message),
+    (error) => error instanceof GatewayError && /连接不到转接服务/.test(error.message) && !/Failed to fetch/.test(error.message),
   );
 });
 

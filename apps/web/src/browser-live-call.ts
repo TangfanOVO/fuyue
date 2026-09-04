@@ -109,12 +109,12 @@ export async function startBrowserLiveCall({ relayUrl, sessionToken, instruction
   };
 
   const ready = new Promise<void>((resolve, reject) => {
-    let settled = false; const timer = window.setTimeout(() => { if (!settled) { settled = true; reject(new Error("relay 全双工电话连接超时")); } }, 8_000);
+    let settled = false; const timer = window.setTimeout(() => { if (!settled) { settled = true; reject(new Error("实时电话连接超时，请检查转接服务后重试")); } }, 8_000);
     socket.onopen = () => socket.send(JSON.stringify({ type: "start", instructions }));
     socket.onmessage = (event) => {
       let message: Record<string, unknown>; try { message = JSON.parse(String(event.data)) as Record<string, unknown>; } catch { return; }
       const type = String(message.type || ""); const text = String(message.delta || message.transcript || message.text || "");
-      if (type === "session.created") { if (!settled) { settled = true; window.clearTimeout(timer); resolve(); } onEvent({ eventType: "connected", providerLabel: "豆包 Seeduplex · relay", model: String((message.session as { model?: unknown } | undefined)?.model || "1.2.6.1") }); }
+      if (type === "session.created") { if (!settled) { settled = true; window.clearTimeout(timer); resolve(); } onEvent({ eventType: "connected", providerLabel: "豆包 Seeduplex · 转接服务", model: String((message.session as { model?: unknown } | undefined)?.model || "1.2.6.1") }); }
       else if (type === "conversation.item.input_audio_transcription.started") { if (session.sources.size) cancelForBarge(); onEvent({ eventType: "transcription_started" }); }
       else if (type === "conversation.item.input_audio_transcription.delta") onEvent({ eventType: "transcript_delta", text });
       else if (type === "conversation.item.input_audio_transcription.completed") {
@@ -134,7 +134,7 @@ export async function startBrowserLiveCall({ relayUrl, sessionToken, instruction
       else if (type === "response.canceled") { stopPlayback(session); if (!session.bargePending) onEvent({ eventType: "turn_canceled" }); session.bargePending = false; }
       else if (type === "error") onEvent({ eventType: "error", message: String(message.message || "全双工电话中断") });
     };
-    socket.onerror = () => { if (!settled) { settled = true; window.clearTimeout(timer); reject(new Error("连不到 relay 全双工电话")); } else onEvent({ eventType: "error", message: "relay 全双工电话连接中断" }); };
+    socket.onerror = () => { if (!settled) { settled = true; window.clearTimeout(timer); reject(new Error("连不到实时电话服务，请检查地址和网络")); } else onEvent({ eventType: "error", message: "实时电话连接中断，请检查网络后重拨" }); };
     socket.onclose = () => { if (!session.stopped) { onEvent({ eventType: "closed" }); void release(false); } };
   });
   try { await ready; }
