@@ -119,6 +119,7 @@ import {
   AmbientLines,
   LineEffectGlyph,
   defaultAppearance,
+  freshAppearancePreset,
   lineEffectRegistry,
   normalizeAppearance,
   shellRegistry,
@@ -5777,6 +5778,10 @@ function AppearancePanel({
         note="外壳、明暗、颜色和漂浮物都随 LocalData 副本迁移"
         onBack={onBack}
       />
+      <button className="fresh-appearance-preset" onClick={() => onChange(freshAppearancePreset)}>
+        <Sparkle />
+        <span><b>开源清新</b><small>潮汐青 · 简洁外壳 · 泡泡与树叶叠加</small></span>
+      </button>
       <section className="choice-section">
         <h2>界面外壳</h2>
         <div className="shell-choice">

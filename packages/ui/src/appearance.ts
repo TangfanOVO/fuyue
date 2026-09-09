@@ -12,7 +12,8 @@ export interface AppearanceSettings {
   layout: ShellLayout;
 }
 
-export const defaultAppearance: AppearanceSettings = { theme: "redleaf", mode: "light", effect: "leaf", effects: ["leaf"], density: 2, speed: 2, layout: "paper" };
+export const freshAppearancePreset: AppearanceSettings = { theme: "tide", mode: "light", effect: "bubble", effects: ["bubble", "leaf"], density: 2, speed: 2, layout: "client" };
+export const defaultAppearance: AppearanceSettings = freshAppearancePreset;
 export const themeRegistry: readonly { id: ThemeName; name: string; note: string; colors: readonly string[] }[] = [
   { id: "redleaf", name: "红叶纸", note: "温暖、安静", colors: ["#f2ede3", "#7a3437", "#d8c6b3"] },
   { id: "blue", name: "晴空蓝", note: "澄蓝、轻亮", colors: ["#f5f8fc", "#4d73a3", "#dce8f4"] },

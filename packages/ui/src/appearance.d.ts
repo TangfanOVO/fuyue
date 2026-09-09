@@ -4,6 +4,7 @@ export type LineEffect = "none" | "snow" | "rain" | "heart" | "leaf" | "butterfl
 export type ShellLayout = "paper" | "client" | "official";
 export interface AppearanceSettings { theme: ThemeName; mode: AppearanceMode; effect: LineEffect; effects: LineEffect[]; density: number; speed: number; layout: ShellLayout }
 export declare const defaultAppearance: AppearanceSettings;
+export declare const freshAppearancePreset: AppearanceSettings;
 export declare const themeRegistry: readonly { id: ThemeName; name: string; note: string; colors: readonly string[] }[];
 export declare const shellRegistry: readonly { id: ShellLayout; name: string; note: string }[];
 export declare const lineEffectRegistry: readonly { id: LineEffect; name: string; darkOnly?: boolean }[];

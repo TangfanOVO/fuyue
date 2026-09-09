@@ -98,7 +98,7 @@ test("chat presents one continuous ledger and keeps source switching inside the 
 
 test("chat owns its scrolling while composer and bottom navigation stay in the viewport", () => {
   assert.match(source, /className="app-shell"[\s\S]{0,240}?data-view=\{view\}/);
-  assert.match(styles, /body:has\(\.app-shell\[data-view="chat"\]\)[^}]*overflow: hidden/);
+  assert.match(styles, /body:has\(\.app-shell\[data-view="chat"\]\)[^}]*position: fixed;[^}]*overflow: hidden/);
   assert.match(styles, /\.app-shell\[data-view="chat"\] \{[^}]*position: fixed;[^}]*height: var\(--app-viewport-height, 100dvh\);[^}]*min-height: 0;[^}]*overflow: hidden;/s);
   assert.match(styles, /\.app-background\[data-view="chat"\] \{ height: 100%; min-height: 0; overflow: hidden; \}/);
   assert.match(styles, /\.view-frame\[data-view="chat"\] \.message-list[^}]*overflow-y: auto/s);
@@ -139,6 +139,9 @@ test("public shell keeps the complete opening sequence", () => {
 });
 
 test("appearance supports stacked ambient effects in every shell, including black and white", () => {
+  assert.match(appearancePackage, /freshAppearancePreset/);
+  assert.match(appearancePackage, /effects: \["bubble", "leaf"\]/);
+  assert.match(source, /开源清新/);
   assert.match(source, /<AmbientLines[\s\S]{0,100}?effects=\{appearance\.effects\}/);
   assert.match(source, /appearance\.effects\.includes\(item\.id\)/);
   assert.match(source, /点“不飘”会清空全部/);
