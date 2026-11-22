@@ -30,6 +30,6 @@ export function StackDeck({ title, items, className = "" }: StackDeckProps) {
       aria-pressed={active}
       aria-label={`${item.title}，${active ? "已浮起，再点进入" : "点一下在原位浮起"}`}
       onClick={() => active ? item.onOpen() : setSelected(item.id)}
-    ><span className="portal-icon">{item.icon}</span><span><strong>{item.title}</strong><small>{item.note}</small></span><em>{active ? "再点进入" : "轻点浮起"}</em><ArrowRight /></button>;
+    ><span className="portal-icon">{item.icon}</span><span><strong>{item.title}</strong><small>{item.note}</small></span><em>{active ? "进入" : ""}</em><ArrowRight /></button>;
   })}</div></section>;
 }

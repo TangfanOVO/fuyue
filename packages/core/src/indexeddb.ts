@@ -28,7 +28,7 @@ const DATABASE_VERSION = 6;
 type StoreName = "people" | "memories" | "conversations" | "messages" | "roomEntries" | "toys" | "toyActivityEvents" | "settings";
 
 function defaultSettings(): WorkspaceSettings {
-  return { id: "workspace", theme: "redleaf", mode: "light", effect: "leaf", effects: ["leaf"], density: 2, speed: 2, layout: "paper", pinnedRoomIds: ["schedule", "checkin", "memory", "work"], hiddenCapabilityIds: [], enabledCapabilityIds: [], updatedAt: new Date().toISOString() };
+  return { id: "workspace", theme: "redleaf", mode: "light", effect: "none", effects: [], density: 2, speed: 2, layout: "paper", pinnedRoomIds: ["schedule", "checkin", "memory", "work"], hiddenCapabilityIds: [], enabledCapabilityIds: [], updatedAt: new Date().toISOString() };
 }
 
 function normalizePerson(profile: PersonProfile): PersonProfile {

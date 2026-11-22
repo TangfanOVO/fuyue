@@ -139,7 +139,7 @@ export function KaomojiDrawer({ repository, reviewRepository, onInsert, title = 
   };
 
   return <section className="fy-kaomoji" aria-label={title}>
-    <header><span><b>{title}</b><small>已带审核好的默认库，使用频率只在本地排序</small></span><button onClick={() => setManaging((value) => !value)}>{managing ? "完成" : "整理"}</button></header>
+    <header><span><b>{title}</b></span><button onClick={() => setManaging((value) => !value)}>{managing ? "完成" : "整理"}</button></header>
     {managing && reviewRepository && <div className="fy-kaomoji-segments" role="tablist" aria-label="整理颜文字">
       <button className={manageView === "library" ? "current" : ""} onClick={() => setManageView("library")} role="tab">我的库</button>
       <button className={manageView === "review" ? "current" : ""} onClick={() => setManageView("review")} role="tab">候选箱{candidates.length ? ` ${candidates.length}` : ""}</button>

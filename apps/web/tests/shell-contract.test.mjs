@@ -42,7 +42,7 @@ test("top-left drawer is a searchable index for public destinations", () => {
   ]) assert.match(source, new RegExp(title));
   assert.match(source, /action: \(\) => openPanel\("status"\)/);
   assert.match(source, /function StatusPanel/);
-  assert.match(source, /公开壳不会复制私人资料、受限素材或假数据来冒充已完成/);
+  assert.match(source, /<p>\{feature\.requirement\}<\/p>/);
 });
 
 test("switching a root tab unwinds stale panel history before replacing the destination", () => {

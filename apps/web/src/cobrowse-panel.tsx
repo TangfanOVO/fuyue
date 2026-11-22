@@ -203,7 +203,7 @@ export function CobrowsePanel({
           ))
         ) : (
           <p className="empty-copy">
-            还没有分享链接。这里不会用示例动态把空间填满。
+            还没有分享链接。
           </p>
         )}
       </section>

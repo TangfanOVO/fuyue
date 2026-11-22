@@ -61,7 +61,7 @@ export function MemoryPanel({ repository, memories, onChange, onBack, onConfigur
     try {
       if (editingId) {
         const current = memories.find((item) => item.id === editingId);
-        if (!current) throw new Error("这条记忆已经不在 LocalData 里了");
+        if (!current) throw new Error("这条记忆已不存在");
         await repository.saveMemory({ ...current, title: title.trim(), content: content.trim(), layer });
       } else await repository.createMemory({ title, content, layer });
       setTitle(""); setContent(""); setLayer("working"); setAdding(false); setEditingId(""); setFilter(editingId ? "all" : "draft");
@@ -114,7 +114,7 @@ export function MemoryPanel({ repository, memories, onChange, onBack, onConfigur
   }
 
   return <div className="panel-content memory-library-panel">
-    <header className="panel-header"><button data-panel-back className="icon-button quiet" onClick={onBack} aria-label="返回"><ArrowLeft /></button><div><h1 id="panel-title">记忆库</h1><p>审批、来源、禁用与检索</p></div></header>
+    <header className="panel-header"><button data-panel-back className="icon-button quiet" onClick={onBack} aria-label="返回"><ArrowLeft /></button><div><h1 id="panel-title">记忆库</h1></div></header>
 
     <section className="memory-library-overview" aria-label="记忆库概览">
       <span><b>{memories.length}</b><small>全部记忆</small></span>
@@ -136,13 +136,13 @@ export function MemoryPanel({ repository, memories, onChange, onBack, onConfigur
       <nav aria-label="记忆层级">{filters.map((item) => <button type="button" className={filter === item.id ? "on" : ""} aria-pressed={filter === item.id} onClick={() => setFilter(item.id)} key={item.id}>{item.label}{item.id === "draft" && pendingCount ? <small>{pendingCount}</small> : null}</button>)}</nav>
     </div>
 
-    <MemoryMap memories={memories} selectedId={selectedMemoryId} onSelect={(item) => { setSelectedMemoryId(item.id); openEdit(item); }} empty="写下第一条后，它会按真实层级出现在这里" />
+    <MemoryMap memories={memories} selectedId={selectedMemoryId} onSelect={(item) => { setSelectedMemoryId(item.id); openEdit(item); }} empty="写下第一条记忆" />
 
     {visibleMemories.length ? <section className="memory-list" aria-label="记忆列表">{visibleMemories.map((item) => <article className={`memory-item ${item.injectionEnabled ? "is-enabled" : "is-draft"}`} key={item.id}>
       <header><div className="memory-badges"><span>{layerLabels[item.layer]}</span><span>{item.injectionEnabled ? "已启用" : "待审"}</span><time>{timeLabel(item.updatedAt)}</time></div><div className="memory-item-actions"><button type="button" className="icon-button quiet" onClick={() => openEdit(item)} aria-label={`编辑记忆 ${item.title}`}><PencilSimple /></button><button type="button" className="icon-button danger" disabled={busyId === item.id} onClick={() => void remove(item)} aria-label={`删除记忆 ${item.title}`}><Trash /></button></div></header>
       <h2>{item.title}</h2><p>{item.content}</p>
       <footer><button type="button" className={`memory-toggle ${item.injectionEnabled ? "is-on" : ""}`} disabled={busyId === item.id} onClick={() => void toggle(item)} aria-pressed={item.injectionEnabled}><i>{item.injectionEnabled && <Check />}</i><span>{item.injectionEnabled ? "参与召回" : "启用记忆"}</span></button><small>{item.sourceMessageIds.length ? `${item.sourceMessageIds.length} 条原文证据` : "手动留下 · 无原文证据"}</small></footer>
-    </article>)}</section> : <section className="memory-library-empty"><Brain /><h2>{memories.length ? "没有符合条件的记忆" : "记忆库还是空的"}</h2><p>{memories.length ? "换一个关键词或层级。" : "新记忆先作为待审内容留下，不会偷跑进模型。"}</p><button type="button" className="secondary-button" onClick={() => { if (memories.length) { setQuery(""); setFilter("all"); } else setAdding(true); }}>{memories.length ? "查看全部" : "写第一条"}</button></section>}
+    </article>)}</section> : <section className="memory-library-empty"><Brain /><h2>{memories.length ? "没有符合条件的记忆" : "记忆库还是空的"}</h2><p>{memories.length ? "换一个关键词或层级。" : "新记忆先存入待审，启用后参与召回。"}</p><button type="button" className="secondary-button" onClick={() => { if (memories.length) { setQuery(""); setFilter("all"); } else setAdding(true); }}>{memories.length ? "查看全部" : "写第一条"}</button></section>}
 
     <details className="memory-system-note"><summary>这套记忆怎样工作</summary><div><p>L1 / L2 / L3 是可审阅层级。当前公开版不会自动蒸馏、升格、降权或遗忘；只有你明确启用的记忆才参与召回。</p><button type="button" className="text-button" onClick={onConfigure}>查看记忆功能包</button></div></details>
 
@@ -156,7 +156,7 @@ export function MemoryPanel({ repository, memories, onChange, onBack, onConfigur
     {importNotice && <p className="memory-import-notice" role="status">{importNotice}</p>}
 
     {adding && <button type="button" className="memory-editor-scrim" onClick={closeEditor} aria-label="关闭记忆编辑" />}
-    <section className={`memory-editor-sheet ${adding ? "is-open" : ""}`} aria-hidden={!adding}><header><div><h2>{editingId ? "整理这条记忆" : "写一条记忆"}</h2><p>{editingId ? "修改后保留原来的召回状态和证据索引。" : "新记忆先作为待审内容，不会偷跑进模型。"}</p></div><button type="button" className="icon-button quiet" onClick={closeEditor} aria-label="关闭记忆编辑"><X /></button></header><form className="editor-form memory-create-form" onSubmit={create}>
+    <section className={`memory-editor-sheet ${adding ? "is-open" : ""}`} aria-hidden={!adding}><header><div><h2>{editingId ? "整理这条记忆" : "写一条记忆"}</h2><p>{editingId ? "修改后保留原来的召回状态和证据索引。" : "新记忆先存入待审，启用后参与召回。"}</p></div><button type="button" className="icon-button quiet" onClick={closeEditor} aria-label="关闭记忆编辑"><X /></button></header><form className="editor-form memory-create-form" onSubmit={create}>
       <label>标题<input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={120} required autoFocus={adding} /></label>
       <label>内容<textarea value={content} onChange={(event) => setContent(event.target.value)} rows={5} maxLength={4000} required /></label>
       <label>记忆层级<select value={layer} onChange={(event) => setLayer(event.target.value as MemoryLayer)}>{Object.entries(layerLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label>
