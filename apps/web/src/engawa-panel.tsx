@@ -63,13 +63,13 @@ export function EngawaPanel({
         </button>
         <div>
           <h1 id="panel-title">Engawa 阅读侧廊</h1>
-          <p>网页、RSS、诗与书架都通过本机 MIT 侧车真实读回。</p>
+          <p>读网页、RSS、诗与书架。</p>
         </div>
       </header>
       {!gateway?.engawaStatus ? (
         <p className="form-error">
           <WarningCircle />
-          先连接自托管 relay；Engawa 不在浏览器里偷偷直连。
+          先连接已启用 Engawa 的自托管 relay。
         </p>
       ) : (
         status && (

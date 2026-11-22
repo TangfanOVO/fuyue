@@ -1,0 +1,91 @@
+/* Quiet navigation, with the existing paper surfaces and two-stage decks. */
+.segment-control,
+.archive-state-tabs,
+.memory-library-controls nav,
+.room-district-grid {
+  display: flex;
+  align-items: stretch;
+  gap: 18px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+:is(.segment-control, .archive-state-tabs, .memory-library-controls nav, .room-district-grid) > button {
+  flex: 0 0 auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 44px;
+  min-height: 48px;
+  padding: 10px 2px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 13px;
+  white-space: nowrap;
+  box-shadow: none;
+  transform: none;
+}
+:is(.segment-control, .archive-state-tabs, .memory-library-controls nav, .room-district-grid) > button:is(.active, .on, [aria-selected="true"]) {
+  border-bottom-color: var(--accent);
+  background: transparent;
+  color: var(--ink);
+  box-shadow: none;
+  transform: none;
+}
+.room-district-grid button em { position: static; font-size: 11px; }
+.room-district-grid button strong { font-size: inherit; }
+.room-district-grid { margin-top: 4px; gap: 12px; flex-wrap: wrap; }
+.room-district-grid > button { font-size: 12px; }
+.rooms-directory { padding-top: 0; }
+.rooms-intro { min-height: 0; padding: 0 4px 18px; border: 0; }
+.rooms-intro h1 { margin: 0; }
+.rooms-intro > svg { width: 28px; height: 28px; justify-self: end; }
+.room-search { margin-top: 0; }
+.room-search:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.room-directory { margin-top: 24px; }
+.room-directory > header { min-height: 0; padding-bottom: 14px; border: 0; }
+.room-directory > .portal-group { margin-top: 0; }
+.portal-card { opacity: 1; border-color: var(--line); box-shadow: 0 4px 10px rgb(0 0 0 / .05); }
+.portal-card.selected { box-shadow: 0 10px 24px rgb(0 0 0 / .1); }
+.portal-icon { border: 0; border-radius: 0; background: transparent; color: color-mix(in srgb, var(--accent) 70%, var(--ink)); }
+.portal-card:not(.selected) small { display: none; }
+.portal-card:not(.selected) > :is(.portal-icon, span:nth-child(2), svg) { transform: translateY(14px); }
+.portal-card strong { font-size: 15px; }
+.portal-card small { font-size: 13px; }
+.portal-card em { font-size: 12px; }
+.presence-card { box-shadow: none; }
+.resume-card { min-height: 104px; box-shadow: 0 6px 18px rgb(0 0 0 / .08); }
+.pin-button > span,
+.direct-row > span:first-child,
+.drawer-entry > span:first-child { border: 0; border-radius: 0; background: transparent; }
+.next-block header > span,
+.peek-action,
+.drawer-entry em,
+.memory-badges span { padding: 0; border-radius: 0; background: transparent; }
+.memory-badges { gap: 10px; }
+.memory-badges span { color: var(--ink-soft); }
+.memory-item.is-enabled::before { content: none; }
+.memory-library-controls nav small { background: transparent; border-radius: 0; }
+.text-button, .next-block button { min-height: 44px; }
+.panel-header { box-shadow: none; }
+.feature-contract { border: 0; border-radius: 0; box-shadow: none; background: transparent; }
+.toybox-safety { padding-inline: 0; border: 0; border-radius: 0; background: transparent; }
+.fy-kaomoji { --fy-accent: var(--accent); --fy-accent-soft: var(--accent-soft); --fy-line: var(--line); --fy-paper: var(--paper-raised); --fy-ink: var(--ink); }
+.kaomoji-sheet .fy-kaomoji { padding: 12px 0 0; border: 0; border-radius: 0; }
+
+/* Night accents are readable ink; filled controls keep their deeper paint. */
+.app-shell[data-mode="dark"][data-theme="redleaf"] { --accent:#daa4a5;--accent-deep:#653034; }
+.app-shell[data-mode="dark"][data-theme="blue"] { --accent:#a5c4e7;--accent-deep:#365b88; }
+.app-shell[data-mode="dark"][data-theme="sakura"] { --accent:#dfb5c0;--accent-deep:#6d454f; }
+.app-shell[data-mode="dark"][data-theme="wisteria"] { --accent:#c8b5d8;--accent-deep:#554a5f; }
+.app-shell[data-mode="dark"][data-theme="tide"] { --accent:#a4d0c4;--accent-deep:#34564f; }
+.app-shell[data-mode="dark"][data-theme="amber"] { --accent:#dec294;--accent-deep:#674a2a; }

@@ -8,6 +8,7 @@ import "@fuyue/kaomoji-drawer/styles.css";
 import "@fuyue/ui/styles.css";
 import "@fuyue/travel-ui/styles.css";
 import "./styles.css";
+import "./ui-refinement.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

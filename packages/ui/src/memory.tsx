@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { MemoryConstellation, type ConstellationMemory, type ConstellationRelation, visualNodeCountForMemoryCount } from "./memory-constellation";
+import { MemoryConstellation, type ConstellationMemory, type ConstellationRelation } from "./memory-constellation";
 
 export { visualNodeCountForMemoryCount, worldDimensionScaleForVisualNodeCount, wrapWorldY } from "./memory-constellation";
 
@@ -68,11 +68,10 @@ export function MemoryMap({ memories, onSelect, empty = "还没有记忆可以�
     created_at: memory.createdAt,
   }));
   const relations = sourceRelations(memories);
-  const visualNodeCount = visualNodeCountForMemoryCount(memories.length);
   return <section className="fuyue-memory-map-real" aria-label="记忆星图">
-    <header><span><strong>记忆星图</strong><small>144 个是视觉下限；超过后每条真记忆至少对应一个字符</small></span><em>{memories.length} 条真记忆 · {visualNodeCount} 个字符 · {relations.length} 条证据关联</em></header>
+    <header><span><strong>记忆星图</strong></span><em>{memories.length} 条记忆 · {relations.length} 条关联</em></header>
     <MemoryConstellation items={items} relations={relations} onEdit={(id) => { const memory = memories.find((item) => item.id === id); if (memory) onSelect?.(memory); }} />
-    {!memories.length ? <p className="memory-constellation-public-note">{empty}；字符星群仍然亮着，但不冒充记忆记录。</p> : null}
+    {!memories.length ? <p className="memory-constellation-public-note">{empty}</p> : null}
   </section>;
 }
 

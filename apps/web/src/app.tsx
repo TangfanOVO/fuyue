@@ -2645,13 +2645,12 @@ function FeaturePanel({
         <Sparkle />
         <h2>
           {feature.capabilityId === "life.calendar"
-            ? "日历有自己的入口"
+            ? "选择日历来源"
             : capability?.provenance?.recommendation === "upstream_available"
-              ? "赴约前端保留，完整能力推荐原作"
-            : "门在，能力还要单独装配"}
+              ? "选择服务或查看原作"
+            : "设置这项功能"}
         </h2>
         <p>{feature.requirement}</p>
-        <small>公开壳不会复制私人资料、受限素材或假数据来冒充已完成。</small>
       </section>
       {feature.capabilityId === "life.calendar" && (
         <CalendarCapabilitySetup
@@ -3444,7 +3443,6 @@ function HomeView(
         <span>
           <small>回到 {props.companionName} 身边</small>
           <strong>我在，今天也接着走。</strong>
-          <em>同一份身份、记忆和聊天账本。</em>
         </span>
         <ArrowRight />
       </button>
@@ -3452,7 +3450,6 @@ function HomeView(
         <header>
           <div>
             <h1>继续上次</h1>
-            <p>只保留一条最自然的续接。</p>
           </div>
         </header>
         <button
@@ -3463,7 +3460,6 @@ function HomeView(
           <span>
             <small>电话与声音</small>
             <strong>回到我们的声音房间</strong>
-            <em>通话、实时转写和原文都留在同一份赴约里</em>
           </span>
           <ArrowRight />
         </button>
@@ -3497,7 +3493,7 @@ function HomeView(
           ) : (
             <>
               <b>还没有读取安排</b>
-              <small>Android 日历、.ics 与自己的日历服务分开设置</small>
+              <small>选择日历来源后查看安排</small>
             </>
           )}
           <button onClick={props.openSchedule}>
@@ -3509,7 +3505,6 @@ function HomeView(
         <header>
           <div>
             <h1>放在手边</h1>
-            <p>常用入口，单击就进。</p>
           </div>
           <button
             className="text-button"
@@ -3563,10 +3558,10 @@ function HomeView(
           <Heart />
           <span>
             <small>{props.companionName} 此刻</small>
-            <strong>{props.mood?.title || "等你把窗帘接上"}</strong>
+            <strong>{props.mood?.title || "还没有留下心情"}</strong>
             <em>
               {props.mood?.detail ||
-                "可见心情由你连接的服务明确返回，不冒充隐藏推理。"}
+                "去心情页看看"}
             </em>
           </span>
           <span className="peek-action">再偷看</span>
@@ -3576,7 +3571,6 @@ function HomeView(
         <header>
           <div>
             <h1>今天留下的</h1>
-            <p>都在你自己的 LocalData 里。</p>
           </div>
         </header>
         <button onClick={() => props.openPanel("data")}>
@@ -3594,7 +3588,6 @@ function HomeView(
           <DownloadSimple />
           <span>
             <strong>{exporting ? "正在准备副本" : "下载今天的副本"}</strong>
-            <small>JSON 只写入你在系统中确认的位置</small>
           </span>
           <ArrowRight />
         </button>
@@ -3648,7 +3641,6 @@ function TogetherView(
     <div className="feature-view page-enter">
       <header className="page-heading">
         <h1>一起</h1>
-        <p>共同生活和行动，直接就能找到。</p>
       </header>
       <div className="segment-control" role="tablist" aria-label="一起的分类">
         {(
@@ -3689,7 +3681,6 @@ function TogetherView(
             <header>
               <div>
                 <h2>现在可以一起</h2>
-                <p>不用进设置，也不用猜入口。</p>
               </div>
             </header>
             <div className="pin-grid">
@@ -3886,7 +3877,7 @@ function StudyView({
       id: "data",
       icon: <Database />,
       title: "数据副本",
-      note: "下载可迁移的 LocalData",
+      note: "导出与恢复",
       onOpen: () => openPanel("data"),
     },
   ].filter(
@@ -3927,7 +3918,6 @@ function StudyView({
     <div className="feature-view page-enter">
       <header className="page-heading">
         <h1>书房</h1>
-        <p>读、整理、连接与迁移。</p>
       </header>
       <StackDeck title="认真收好" items={cards} />
       <StackDeck title="继续搭建" items={build} />
@@ -4284,9 +4274,7 @@ function RoomsView({
     <div className="feature-view rooms-directory page-enter">
       <header className="rooms-intro">
         <span>
-          <small>全部房间</small>
-          <h1>先选用途，再开房门</h1>
-          <p>{allCards.length} 个入口都在，平时只展开当下需要的一类。</p>
+          <h1>全部房间</h1>
         </span>
         <Stack />
       </header>
@@ -4295,7 +4283,8 @@ function RoomsView({
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="找房间，比如相册、记忆或设置"
+          placeholder="搜索房间"
+          aria-label="搜索房间"
         />
         <strong>{normalized ? cards.length : allCards.length} 间</strong>
         {query && (
@@ -4313,10 +4302,8 @@ function RoomsView({
               className={group.id === groupId ? "active" : ""}
               onClick={() => setGroupId(group.id)}
             >
-              <span>{group.icon}</span>
               <div>
                 <strong>{group.label}</strong>
-                <small>{group.note}</small>
               </div>
               <em>{group.cards.length}</em>
             </button>
@@ -4328,11 +4315,7 @@ function RoomsView({
           <header>
             <span>
               <h2>{normalized ? "搜索结果" : activeGroup?.label}</h2>
-              <p>
-                {normalized ? `找到 ${cards.length} 个入口` : activeGroup?.note}
-              </p>
             </span>
-            <strong>{cards.length}</strong>
           </header>
           <StackDeck items={cards} />
         </section>

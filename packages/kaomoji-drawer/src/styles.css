@@ -9,3 +9,18 @@
 @media(prefers-reduced-motion:reduce){.fy-kaomoji *{scroll-behavior:auto!important;transition:none!important}}
 .fy-kaomoji-star{border-radius:999px;color:#92a3b3;transition:background-color .16s ease,color .16s ease,transform .16s ease}.fy-kaomoji-star:hover{color:var(--fy-accent)}.fy-kaomoji-star.is-favorite,.fy-kaomoji-star[aria-pressed="true"]{background:var(--fy-accent-soft);color:var(--fy-accent);transform:scale(1.04)}.fy-kaomoji-more{min-height:42px;margin-top:8px;border:1px solid var(--fy-line);border-radius:11px;background:var(--fy-paper);color:var(--fy-accent)}
 @media(prefers-reduced-motion:reduce){.fy-kaomoji-star{transition:none!important}}
+
+/* Text tabs and a roomy glyph grid also apply to standalone consumers. */
+.fy-kaomoji nav,.fy-kaomoji-segments { gap:16px;padding:0;border-bottom:1px solid var(--fy-line);border-radius:0;background:transparent; }
+.fy-kaomoji nav button,.fy-kaomoji-segments button { min-width:44px;min-height:48px;padding:10px 2px;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--fy-ink); }
+.fy-kaomoji nav button.current,.fy-kaomoji-segments button.current { border-bottom-color:var(--fy-accent);background:transparent;color:var(--fy-accent);box-shadow:none; }
+.fy-kaomoji-grid { grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:0 10px; }
+.fy-kaomoji-value { min-height:64px;padding:10px 44px 10px 4px;border:0;border-bottom:1px solid var(--fy-line);border-radius:0;text-align:left; }
+.fy-kaomoji-star,.fy-kaomoji-remove { width:44px;height:44px;top:10px;right:0;border-radius:8px; }
+.fy-kaomoji-star.is-favorite,.fy-kaomoji-star[aria-pressed="true"] { background:transparent;transform:none;color:var(--fy-accent); }
+.fy-kaomoji-grid article>span { padding:0;background:transparent;border-radius:0; }
+.fy-kaomoji-order,.fy-kaomoji-sync { border:0;border-block:1px solid var(--fy-line);border-radius:0;padding-inline:0; }
+.fy-kaomoji-order p { grid-template-columns:18px 1fr 44px 44px;border:0;border-bottom:1px solid var(--fy-line);border-radius:0; }
+.fy-kaomoji-order p button { width:44px;height:44px; }
+.fy-kaomoji-order-reset,.fy-kaomoji-more,.fy-kaomoji-sync-modes button,.fy-kaomoji-sync-now { min-height:44px; }
+.fy-kaomoji button:focus-visible,.fy-kaomoji summary:focus-visible { outline:2px solid var(--fy-accent);outline-offset:2px; }
