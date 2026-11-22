@@ -1,0 +1,46 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import ts from 'typescript';
+import {chromium} from 'playwright-core';
+const source=await readFile(new URL('../apps/web/src/navigation-feedback.ts',import.meta.url),'utf8');
+const script=ts.transpileModule(source.replace('export function','function'),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
+const css=await readFile(new URL('../apps/web/src/navigation-feedback.css',import.meta.url),'utf8');
+const browser=await chromium.launch({executablePath:process.env.FUYUE_QA_CHROME||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true});
+try{
+ const page=await browser.newPage({viewport:{width:390,height:800}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.setContent(`<style>${css}body{margin:0}.quiet-tabs{display:flex;width:360px;gap:12px}.quiet-tabs>button{flex:1;min-height:48px}.overflow{width:200px;overflow-x:auto}.overflow>button{flex:0 0 120px}</style><main class="app-shell"><nav class="quiet-tabs"><button class="on">One</button><button>Two</button><button>Three</button></nav><nav class="quiet-tabs overflow"><button class="on">First</button><button>Second</button><button>Last</button></nav></main>`);
+ await page.evaluate(script+';window.cleanup=installNavigationFeedback(document);window.commits=0;document.querySelectorAll("nav").forEach(nav=>nav.addEventListener("click",e=>{if(e.target.tagName!=="BUTTON")return;window.commits++;nav.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b===e.target))}));');
+ const group=page.locator('nav').first(),buttons=group.locator('button');
+ await page.waitForFunction(()=>document.querySelector('nav').dataset.navOverflow==='false');
+ const a=await buttons.nth(0).boundingBox(),b=await buttons.nth(1).boundingBox(),c=await buttons.nth(2).boundingBox();
+ await page.mouse.move(a.x+a.width/2,24);await page.mouse.down();
+ assert.equal(await buttons.nth(0).getAttribute('data-nav-pressed'),'true');
+ await page.mouse.move(c.x+c.width/2,24,{steps:8});
+ assert.equal(await page.evaluate(()=>window.commits),0,'drag must not activate content');
+ await page.mouse.up();await page.waitForTimeout(250);
+ assert.equal(await page.evaluate(()=>window.commits),1,'drag releases exactly one action');assert.equal(await buttons.nth(2).getAttribute('class'),'on');
+ const marker=await group.locator('.navigation-indicator').boundingBox();assert.ok(Math.abs(marker.x-c.x)<1&&Math.abs(marker.width-c.width)<1);
+ await buttons.nth(1).click();await page.waitForTimeout(250);assert.equal(await page.evaluate(()=>window.commits),2,'tap is not swallowed after drag');
+ await page.mouse.move(b.x+b.width/2,24);await page.mouse.down();await page.mouse.move(a.x+a.width/2,24,{steps:4});
+ await group.dispatchEvent('pointercancel',{pointerId:1,isPrimary:true});await page.mouse.move(380,300);await page.mouse.up();await page.waitForTimeout(250);
+ assert.equal(await buttons.nth(1).getAttribute('class'),'on','cancel restores selected tab');
+ await buttons.nth(0).focus();await page.keyboard.press('Enter');await page.waitForTimeout(30);
+ assert.equal(await buttons.nth(0).getAttribute('class'),'on');assert.equal(await group.locator('.navigation-indicator').evaluate(e=>e.style.transitionDuration),'0ms');
+ const cdp=await page.context().newCDPSession(page);
+ const touch=async(type,x)=>cdp.send('Input.dispatchTouchEvent',{type,touchPoints:type==='touchEnd'?[]:[{x,y:24,id:1}]});
+ const beforeTouch=await page.evaluate(()=>window.commits);
+ await touch('touchStart',a.x+a.width/2);
+ for(let x=a.x+a.width/2;x<c.x+c.width/2;x+=20){await touch('touchMove',x);await page.waitForTimeout(16)}
+ await touch('touchMove',c.x+c.width/2);await touch('touchEnd');await page.waitForTimeout(250);
+ assert.equal(await page.evaluate(()=>window.commits),beforeTouch+1,'real touch capture transfer commits once');
+ assert.equal(await buttons.nth(2).getAttribute('class'),'on');
+ await page.emulateMedia({reducedMotion:'reduce'});await buttons.nth(2).click();await page.waitForTimeout(30);
+ assert.equal(await group.locator('.navigation-indicator').evaluate(e=>e.style.transitionDuration),'0ms');
+ const overflow=page.locator('nav').nth(1);assert.equal(await overflow.getAttribute('data-nav-overflow'),'true');
+ assert.equal(await overflow.evaluate(e=>getComputedStyle(e).touchAction),'auto','overflow keeps native scrolling');
+ await overflow.evaluate(e=>e.scrollLeft=100);assert.ok(await overflow.evaluate(e=>e.scrollLeft)>0);
+ await page.evaluate(()=>{const nav=document.createElement('nav');nav.className='quiet-tabs';nav.innerHTML='<button class="on">New</button><button>Next</button>';document.querySelector('main').append(nav)});
+ await page.locator('nav').nth(2).locator('.navigation-indicator').waitFor({state:'attached'});
+ await page.evaluate(()=>window.cleanup());assert.equal(await page.locator('.navigation-indicator').count(),0);
+ assert.deepEqual(errors,[]);console.log('PASS: real touch, drag preview/release, tap, cancel, keyboard, reduced motion, overflow scrolling, dynamic mounting and cleanup');
+}finally{await browser.close()}
