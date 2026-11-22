@@ -1,0 +1,16 @@
+/* The underline is a single composited layer, including in the native shell. */
+[data-nav-feedback] { position: relative; }
+[data-nav-feedback][data-nav-overflow="false"] { touch-action: pan-y pinch-zoom; }
+.app-shell [data-nav-feedback] > button { position: relative; border-bottom-color: transparent !important; transition: color 120ms ease, transform 120ms cubic-bezier(.23,1,.32,1); }
+.app-shell [data-nav-feedback] > button[data-nav-pressed] { transform: scale(.97); color: var(--ink); }
+[data-nav-feedback] > .navigation-indicator {
+  position: absolute; left: 0; top: 0; width: 1px; height: 2px; margin: 0; padding: 0;
+  border: 0; border-radius: 0; background: var(--accent); pointer-events: none;
+  transform-origin: left center; transition: transform 180ms cubic-bezier(.23,1,.32,1);
+}
+[data-nav-feedback] > .navigation-indicator[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .app-shell [data-nav-feedback] > button { transition: none; }
+  .app-shell [data-nav-feedback] > button[data-nav-pressed] { transform: none; }
+  [data-nav-feedback] > .navigation-indicator { transition: none; }
+}

@@ -9,6 +9,11 @@ import "@fuyue/ui/styles.css";
 import "@fuyue/travel-ui/styles.css";
 import "./styles.css";
 import "./ui-refinement.css";
+import "./navigation-feedback.css";
+import { installNavigationFeedback } from "./navigation-feedback";
+
+const removeNavigationFeedback = installNavigationFeedback(document, ".segment-control,.archive-state-tabs,.memory-library-controls nav,.room-district-grid,.fy-kaomoji > nav,.fy-kaomoji-segments");
+if (import.meta.hot) import.meta.hot.dispose(removeNavigationFeedback);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
